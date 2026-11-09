@@ -12,10 +12,14 @@ const themes = {
   sand: { paper: '#f2e5d7', light: '#fff9f1', dark: '#583729', accent: '#946344', ink: '#342520', line: '#e4cdb8' }
 };
 const example = {
-  kind: 'Термокружка', brand: 'Nord Cup', category: 'Дом и сад', price: '1290',
-  facts: 'Объём: 500 мл\nМатериал корпуса: нержавеющая сталь\nЦвет: шалфейный\nКрышка: с откидным клапаном\nКомплектация: термокружка, крышка',
-  benefits: 'Открывается одной рукой\nПомещается в автомобильный подстаканник\nУдобно брать в дорогу'
+  kind: 'Бомбочки для ванны с игрушками', brand: 'Avanture', category: 'Красота и уход', price: '923',
+  facts: 'В наборе: 6 бомбочек\nМасса набора: 400 г\nЦвет: разноцветный\nАроматы: ваниль, клубника, банан, шоколад, мохито и лаванда',
+  benefits: 'Фигурки капибар\nШесть ароматов в одном наборе\nПодарочная коробка'
 };
+const examplePhotos = [
+  'https://ir.ozone.ru/s3/multimedia-1-2/wc1000/7325426270.jpg',
+  'https://ir.ozone.ru/s3/multimedia-1-i/wc1000/7325426178.jpg'
+];
 const sourceForm = byId('source');
 let examplePhoto = false;
 let revision = 0;
@@ -61,22 +65,34 @@ function assembleText(source) {
   return { name, description, points: source.benefits.length ? source.benefits : source.facts.slice(0, 3).map(([key, value]) => (key + ': ' + value).slice(0, 80)) };
 }
 
-async function loadPhoto() {
+async function decodePhoto(url, remote = false) {
+  const image = new Image();
+  if (remote) {
+    image.crossOrigin = 'anonymous';
+    image.referrerPolicy = 'no-referrer';
+  }
+  image.src = url;
+  await image.decode();
+  return image;
+}
+
+async function loadPhotos() {
   const file = byId('photo').files[0];
   if (!file && !examplePhoto) throw new Error('Добавьте фото товара.');
+  if (!file) {
+    try { return await Promise.all(examplePhotos.map((url) => decodePhoto(url, true))); }
+    catch { throw new Error('Ozon не отдал фотографии примера. Попробуйте позже или загрузите своё фото.'); }
+  }
   if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024)) {
     throw new Error('Выберите JPG, PNG или WebP размером до 10 МБ.');
   }
-  const url = file ? URL.createObjectURL(file) : 'sample-mug.svg';
+  const url = URL.createObjectURL(file);
   try {
-    const image = new Image();
-    image.src = url;
-    await image.decode();
-    return image;
+    return [await decodePhoto(url)];
   } catch {
     throw new Error('Не удалось открыть фото. Попробуйте другой файл.');
   } finally {
-    if (file) URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
   }
 }
 
@@ -151,7 +167,7 @@ function background(canvas, colors, dark = false) {
 
 function renderSlides() {
   const colors = themes[input('theme')] || themes.mint;
-  const { source, image } = draft;
+  const { source, photos: [image, detail = image] } = draft;
   const name = input('title') || source.kind;
   const points = lines(input('points')).slice(0, 3);
   const cover = background(byId('cover'), colors);
@@ -183,7 +199,7 @@ function renderSlides() {
   const highlight = background(byId('highlights'), colors, true);
   drawText(highlight, '02  /  О ТОВАРЕ', 58, 57, 780, { size: 26, color: colors.paper, weight: 800 });
   drawText(highlight, points.length ? 'Главные особенности' : source.kind, 58, 110, 780, { size: 64, min: 46, count: 2, color: '#fff' });
-  photoPanel(highlight, image, 58, 275, 784, 405, colors.paper);
+  photoPanel(highlight, detail, 58, 275, 784, 405, colors.paper);
   points.forEach((point, index) => {
     const y = 710 + index * 144;
     shape(highlight, 58, y, 784, 123, 20, colors.light);
@@ -211,10 +227,10 @@ async function buildCard(textOverride, errorTarget) {
   status(errorTarget, 'Готовим карточку…');
   try {
     const source = readSource();
-    const image = await loadPhoto();
+    const photos = await loadPhotos();
     if (attempt !== revision) return;
     const text = textOverride || assembleText(source);
-    draft = { source, image };
+    draft = { source, photos };
     byId('title').value = text.name;
     byId('description').value = text.description;
     byId('points').value = text.points.join('\n');
@@ -310,6 +326,7 @@ async function encodeCard(card) {
 sourceForm.addEventListener('input', (event) => {
   if (event.target.id === 'photo') {
     examplePhoto = false;
+    byId('example-source').hidden = true;
     byId('photo-note').textContent = 'JPG, PNG или WebP, до 10 МБ.';
   }
   invalidate();
@@ -321,7 +338,8 @@ byId('demo').addEventListener('click', () => {
   for (const [id, value] of Object.entries(example)) byId(id).value = value;
   byId('photo').value = '';
   examplePhoto = true;
-  byId('photo-note').textContent = 'Загружена демонстрационная иллюстрация термокружки.';
+  byId('example-source').hidden = false;
+  byId('photo-note').textContent = 'Для примера используются две фотографии с Ozon.';
   void buildCard(null, 'source-status');
 });
 byId('copy-prompt').addEventListener('click', async () => {

@@ -71,7 +71,7 @@
     <div class="hero"><p class="kicker">Карточка товара</p><h1>Из фото и фактов в готовую карточку</h1><p class="intro">Соберите название, описание, три слайда инфографики и ссылку на макет.</p></div>
     <div class="workspace">
       <section class="panel" aria-labelledby="source-title">
-        <div class="panel-head"><h2 id="source-title">1. Данные товара</h2><button id="demo" class="button secondary small" type="button">Пример с термокружкой</button></div>
+        <div class="panel-head"><h2 id="source-title">1. Данные товара</h2><button id="demo" class="button secondary small" type="button">Пример с бомбочками для ванны</button></div>
         <form id="source">
           <div class="fields">
             <div class="field"><label for="kind">Что продаём</label><input id="kind" maxlength="64" required placeholder="Термокружка"></div>
@@ -81,6 +81,7 @@
             <div class="field full"><label for="facts">Характеристики</label><textarea id="facts" rows="4" maxlength="500" required placeholder="Объём: 500 мл&#10;Материал: нержавеющая сталь&#10;Цвет: зелёный"></textarea><p class="hint">До 8 строк в формате «Характеристика: значение».</p></div>
             <div class="field full"><label for="benefits">Преимущества или сценарии использования</label><textarea id="benefits" rows="3" maxlength="300" placeholder="Можно открыть крышку одной рукой&#10;Помещается в подстаканник"></textarea><p class="hint">До 3 подтверждённых преимуществ, по одному на строку.</p></div>
             <div class="field full"><label for="photo">Фото товара</label><input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-note"><p id="photo-note" class="hint">JPG, PNG или WebP, до 10 МБ.</p></div>
+            <p class="hint full" id="example-source" hidden>Фото и характеристики из <a href="https://www.ozon.ru/product/podarochnyy-nabor-shipuchie-bombochki-dlya-vanny-s-igrushkoy-6-sht-ruchnoy-raboty-s-praline-1864110784/" target="_blank" rel="noopener noreferrer">карточки Avanture на Ozon</a>. Цена в примере демонстрационная.</p>
           </div>
           <div class="actions"><button id="generate" class="button" type="submit">Собрать карточку</button></div>
           <p id="source-status" class="status" role="status"></p>
@@ -96,7 +97,7 @@
       </section>
       <section class="panel" aria-labelledby="result-title">
         <div class="panel-head"><h2 id="result-title">2. Готовая карточка</h2><span class="hint">PNG · 900 × 1200</span></div>
-        <p id="empty" class="empty">Добавьте свои данные или откройте пример с термокружкой.</p>
+        <p id="empty" class="empty">Добавьте свои данные или откройте пример с бомбочками для ванны.</p>
         <div id="result" class="result" hidden>
           <details class="draft"><summary>Редактировать название, описание и оформление</summary>
             <div class="fields">
