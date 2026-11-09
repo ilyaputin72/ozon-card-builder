@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Создайте название, описание и три слайда инфографики для карточки товара.">
+  <title>Студия карточек · Конструктор для Ozon</title>
+  <style>
+    :root { color-scheme:light; --ink:#172338; --muted:#55657a; --line:#dce4ee; --blue:#005bff; --pale:#eaf3ff; --paper:#f3f6fa; }
+    * { box-sizing:border-box; }
+    [hidden] { display:none!important; }
+    body { margin:0; color:var(--ink); background:var(--paper); font:15px/1.5 system-ui,sans-serif; }
+    button,input,textarea,select { font:inherit; }
+    a { color:var(--blue); }
+    button { cursor:pointer; }
+    button:disabled { opacity:.65; cursor:wait; }
+    :focus-visible { outline:3px solid #6ca0ff; outline-offset:3px; }
+    .wrap { width:min(1220px,calc(100% - 48px)); margin:auto; }
+    .top { background:#fff; border-bottom:1px solid var(--line); }
+    .top .wrap { display:flex; gap:12px; justify-content:space-between; align-items:center; min-height:62px; }
+    .brand { font-size:18px; font-weight:800; }
+    .top a { font-weight:650; text-decoration:none; }
+    .hero { padding:34px 0 24px; }
+    .kicker { margin:0 0 5px; font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--blue); }
+    h1 { margin:0; font-size:clamp(32px,5vw,54px); letter-spacing:-.05em; line-height:1.07; }
+    h2 { margin:0; font-size:23px; letter-spacing:-.025em; }
+    h3 { margin:0 0 5px; font-size:16px; }
+    .intro { margin:10px 0 0; color:var(--muted); font-size:16px; }
+    .workspace { display:grid; grid-template-columns:minmax(290px,.78fr) minmax(0,1.45fr); gap:18px; align-items:start; }
+    .panel { min-width:0; padding:20px; border:1px solid var(--line); border-radius:18px; background:#fff; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:13px; }
+    .fields { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    .fields > * { min-width:0; }
+    .full { grid-column:1/-1; }
+    .field { display:grid; gap:4px; min-width:0; }
+    label { font-weight:680; }
+    input,textarea,select { min-width:0; width:100%; border:1px solid #ccd7e5; border-radius:9px; padding:8px 10px; background:#fbfcfe; color:var(--ink); }
+    input[type=file] { font-size:13px; }
+    textarea { resize:vertical; }
+    .hint { margin:0; color:var(--muted); font-size:13px; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+    .button { display:inline-block; border:1px solid transparent; border-radius:9px; padding:8px 12px; background:var(--blue); color:white; font-weight:700; text-decoration:none; }
+    .button:hover { background:#004cdb; }
+    .secondary { background:var(--pale); color:#004bc8; }
+    .secondary:hover { background:#d8eaff; }
+    .small { font-size:13px; padding:6px 9px; }
+    .result { display:grid; gap:16px; }
+    .draft { padding:12px; border-radius:12px; border:1px solid var(--line); }
+    summary { cursor:pointer; font-weight:750; }
+    .draft .fields { margin-top:10px; }
+    .slides { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .slide { min-width:0; margin:0; }
+    .slide canvas { display:block; width:100%; height:auto; aspect-ratio:3/4; border-radius:10px; border:1px solid var(--line); }
+    .slide figcaption { margin:5px 0; font-size:13px; font-weight:650; }
+    .share { display:grid; gap:7px; padding:12px; border-radius:11px; background:var(--pale); }
+    .status { min-height:1.5em; margin:8px 0 0; color:var(--muted); font-size:13px; }
+    .status[data-error] { color:#a12b26; }
+    .ai { margin-top:15px; padding-top:13px; border-top:1px solid var(--line); }
+    .ai .field { margin-top:10px; }
+    .empty { padding:42px 10px; color:var(--muted); text-align:center; background:var(--paper); border-radius:12px; }
+    footer { padding:18px 0 25px; color:var(--muted); font-size:13px; }
+    @media(max-width:930px) { .workspace { grid-template-columns:1fr; } }
+    @media(max-width:560px) { .wrap { width:calc(100% - 24px); } .panel { padding:13px; } .slides { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:365px) { .fields,.slides { grid-template-columns:1fr; } }
+  </style>
+  <script defer src="studio.js"></script>
+</head>
+<body>
+  <header class="top"><div class="wrap"><span class="brand">Студия карточек</span><a href="./">Ручной редактор</a></div></header>
+  <main class="wrap">
+    <div class="hero"><p class="kicker">Карточка товара</p><h1>Из фото и фактов в готовую карточку</h1><p class="intro">Соберите название, описание, три слайда инфографики и ссылку на макет.</p></div>
+    <div class="workspace">
+      <section class="panel" aria-labelledby="source-title">
+        <div class="panel-head"><h2 id="source-title">1. Данные товара</h2><button id="demo" class="button secondary small" type="button">Пример с термокружкой</button></div>
+        <form id="source">
+          <div class="fields">
+            <div class="field"><label for="kind">Что продаём</label><input id="kind" maxlength="64" required placeholder="Термокружка"></div>
+            <div class="field"><label for="brand">Бренд или модель</label><input id="brand" maxlength="35" placeholder="Необязательно"></div>
+            <div class="field"><label for="category">Категория</label><select id="category"><option>Дом и сад</option><option>Электроника</option><option>Одежда и обувь</option><option>Красота и уход</option><option>Спорт и отдых</option><option>Детские товары</option><option>Другое</option></select></div>
+            <div class="field"><label for="price">Цена, ₽</label><input id="price" inputmode="decimal" maxlength="14" placeholder="1 249,50"></div>
+            <div class="field full"><label for="facts">Характеристики</label><textarea id="facts" rows="4" maxlength="500" required placeholder="Объём: 500 мл&#10;Материал: нержавеющая сталь&#10;Цвет: зелёный"></textarea><p class="hint">До 8 строк в формате «Характеристика: значение».</p></div>
+            <div class="field full"><label for="benefits">Преимущества или сценарии использования</label><textarea id="benefits" rows="3" maxlength="300" placeholder="Можно открыть крышку одной рукой&#10;Помещается в подстаканник"></textarea><p class="hint">До 3 подтверждённых преимуществ, по одному на строку.</p></div>
+            <div class="field full"><label for="photo">Фото товара</label><input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-note"><p id="photo-note" class="hint">JPG, PNG или WebP, до 10 МБ.</p></div>
+          </div>
+          <div class="actions"><button id="generate" class="button" type="submit">Собрать карточку</button></div>
+          <p id="source-status" class="status" role="status"></p>
+        </form>
+        <details class="ai">
+          <summary>Подготовить текст с ChatGPT</summary>
+          <p class="hint">Скопируйте запрос, отправьте его в ChatGPT и вставьте полученный ответ. Запрос содержит текстовые поля товара.</p>
+          <div class="actions"><button id="copy-prompt" class="button secondary small" type="button">Скопировать запрос</button><a class="button secondary small" href="https://chatgpt.com/" target="_blank" rel="noopener">Открыть ChatGPT ↗</a></div>
+          <div class="field"><label for="ai-response">Ответ ChatGPT</label><textarea id="ai-response" rows="4" maxlength="6000" placeholder="Вставьте JSON из ответа"></textarea></div>
+          <div class="actions"><button id="import-ai" class="button secondary small" type="button">Применить текст</button></div>
+          <p id="ai-status" class="status" role="status"></p>
+        </details>
+      </section>
+      <section class="panel" aria-labelledby="result-title">
+        <div class="panel-head"><h2 id="result-title">2. Готовая карточка</h2><span class="hint">PNG · 900 × 1200</span></div>
+        <p id="empty" class="empty">Добавьте свои данные или откройте пример с термокружкой.</p>
+        <div id="result" class="result" hidden>
+          <details class="draft"><summary>Редактировать название, описание и оформление</summary>
+            <div class="fields">
+              <div class="field full"><label for="title">Название</label><input id="title" maxlength="100"></div>
+              <div class="field full"><label for="description">Описание</label><textarea id="description" maxlength="1500" rows="4"></textarea></div>
+              <div class="field full"><label for="points">Короткие подписи для слайда</label><textarea id="points" maxlength="240" rows="3"></textarea></div>
+              <div class="field"><label for="theme">Цвет слайдов</label><select id="theme"><option value="mint">Мята</option><option value="blue">Синий</option><option value="sand">Песочный</option></select></div>
+              <div class="field"><label for="format">Формат главного слайда</label><select id="format"><option value="cover">Фото с заголовком</option><option value="plain">Только фото</option></select></div>
+            </div>
+          </details>
+          <div class="slides">
+            <figure class="slide"><canvas id="cover" width="900" height="1200" aria-label="Главный слайд"></canvas><figcaption>01 · Главное фото</figcaption><button class="button secondary small" data-download="cover" type="button">Скачать PNG 1</button></figure>
+            <figure class="slide"><canvas id="highlights" width="900" height="1200" aria-label="Слайд с преимуществами"></canvas><figcaption>02 · Преимущества</figcaption><button class="button secondary small" data-download="highlights" type="button">Скачать PNG 2</button></figure>
+            <figure class="slide"><canvas id="specifications" width="900" height="1200" aria-label="Слайд с характеристиками"></canvas><figcaption>03 · Характеристики</figcaption><button class="button secondary small" data-download="specifications" type="button">Скачать PNG 3</button></figure>
+          </div>
+          <div class="actions"><button id="copy-text" class="button secondary" type="button">Скопировать название и описание</button><button id="make-link" class="button" type="button">Создать ссылку на макет</button></div>
+          <div id="share" class="share" hidden><label for="share-url">Ссылка на карточку</label><input id="share-url" readonly><div class="actions"><a id="open-card" class="button" target="_blank" rel="noopener">Открыть макет ↗</a><button id="copy-link" class="button secondary" type="button">Скопировать ссылку</button></div><p class="hint">Ссылка длинная, потому что в неё встроены три уменьшенных слайда. Для полного размера скачайте PNG.</p></div>
+          <p id="result-status" class="status" role="status"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="wrap">Учебный конструктор для продавцов Ozon. Слайды и ссылка формируются в вашем браузере.</footer>
+</body>
+</html>
