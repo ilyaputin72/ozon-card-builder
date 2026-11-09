@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 690">
+              <defs>
+                <radialGradient id="bg" cx="53%" cy="43%" r="70%"><stop stop-color="#f7f0ff"/><stop offset="1" stop-color="#d7c6f2"/></radialGradient>
+                <linearGradient id="band" x2=".75" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#544966"/><stop offset=".48" stop-color="#292335"/><stop offset="1" stop-color="#1a1723"/></linearGradient>
+                <linearGradient id="cup" x2="1" y2="1"><stop stop-color="#534a62"/><stop offset=".55" stop-color="#2f293d"/><stop offset="1" stop-color="#191622"/></linearGradient>
+                <radialGradient id="shadow"><stop stop-color="#3b254f" stop-opacity=".28"/><stop offset="1" stop-color="#3b254f" stop-opacity="0"/></radialGradient>
+              </defs>
+              <rect width="520" height="690" fill="url(#bg)"/><g transform="translate(-97 112) scale(1.38)">
+              <g fill="none" stroke="#fff" opacity=".55"><circle cx="264" cy="165" r="126"/><circle cx="264" cy="165" r="151"/><circle cx="264" cy="165" r="177"/></g>
+              <ellipse cx="269" cy="292" rx="134" ry="24" fill="url(#shadow)"/>
+              <g transform="rotate(-12 260 169)">
+                <path d="M161 204v-38c0-64 40-111 100-111s100 47 100 111v38" fill="none" stroke="url(#band)" stroke-width="23" stroke-linecap="round"/>
+                <path d="M168 159c4-56 40-97 93-97s90 41 93 97" fill="none" stroke="#81768d" stroke-width="2" opacity=".66"/>
+                <path d="M159 170v40m203-40v40" stroke="#b6aabe" stroke-width="8" stroke-linecap="round"/>
+                <g transform="rotate(-10 171 222)"><rect x="140" y="177" width="58" height="92" rx="26" fill="url(#cup)"/><rect x="179" y="180" width="26" height="88" rx="12" fill="#262030"/><path d="M152 202v40" stroke="#8d809a" stroke-width="2" opacity=".48" stroke-linecap="round"/></g>
+                <g transform="rotate(10 347 222)"><rect x="315" y="180" width="27" height="88" rx="12" fill="#211b2c"/><rect x="328" y="177" width="59" height="92" rx="26" fill="url(#cup)"/><path d="M373 199v36" stroke="#9489a4" stroke-width="2" opacity=".6" stroke-linecap="round"/><circle cx="364" cy="248" r="2.5" fill="#bc9eff"/></g>
+              </g>
+            </g></svg>

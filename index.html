@@ -47,6 +47,9 @@
     .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 17px; }
     .primary, .secondary { border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; font-weight: 700; }
     .primary { color: white; background: var(--purple); }
+    a.primary { text-decoration: none; }
+    #share-result { margin-top: 14px; padding: 12px; background: var(--soft); border-radius: 10px; }
+    #share-result .actions { margin-top: 3px; }
     .primary:hover { background: #48269d; }
     .secondary { border-color: var(--line); color: var(--ink); background: white; }
     .secondary:hover, .quiet:hover { background: #ede4ff; }
@@ -103,8 +106,21 @@
             <div class="field full"><span class="photo-label">Фото товара</span><div class="upload">
               <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="file-name"><label class="quiet" for="photo">Выбрать фото</label><span id="file-name" class="hint file-name">JPG, PNG или WebP до 10 МБ</span><button class="quiet" id="remove-photo" type="button" hidden>Убрать фото</button>
             </div></div>
+            <div class="field full"><label for="photo-links">Ссылки на фото</label><textarea id="photo-links" rows="2" maxlength="6000" placeholder="https://…"></textarea><p class="hint">До пяти прямых HTTPS-ссылок, по одной на строку. Ссылки на фото позволяют сделать ссылку на макет короче.</p></div>
+            <div class="field"><label for="brand">Бренд</label><input id="brand" maxlength="60" placeholder="Studio One"></div>
+            <div class="field"><label for="sku">Артикул</label><input id="sku" maxlength="40" placeholder="STUDIO-ONE"></div>
+            <div class="field"><label for="color">Цвет</label><input id="color" maxlength="60" placeholder="Графитовый"></div>
+            <div class="field"><label for="seller">Продавец</label><input id="seller" maxlength="80" placeholder="Название магазина"></div>
+            <div class="field"><label for="bank-price">Цена с Ozon Картой, ₽</label><input id="bank-price" inputmode="decimal" maxlength="14" placeholder="Необязательно"></div>
+            <div class="field"><label for="old-price">Цена до скидки, ₽</label><input id="old-price" inputmode="decimal" maxlength="14" placeholder="Необязательно"></div>
           </div>
-          <div class="actions"><button class="primary" type="button" id="copy">Скопировать текст</button><button class="secondary" type="button" id="clear">Очистить</button></div>
+          <div class="actions"><button class="primary" type="button" id="make-link">Создать ссылку на макет</button><button class="secondary" type="button" id="copy">Скопировать текст</button><button class="secondary" type="button" id="clear">Очистить</button></div>
+          <div id="share-result" class="field" hidden>
+            <label for="share-url">Ссылка на готовую карточку</label>
+            <input id="share-url" readonly>
+            <div class="actions"><a id="open-layout" class="primary" target="_blank" rel="noopener">Открыть макет ↗</a><button id="copy-link" class="secondary" type="button">Скопировать ссылку</button></div>
+            <p class="hint">По ссылке будут видны данные и фото из этого черновика.</p>
+          </div>
           <p id="status" class="hint status" role="status"></p>
         </form>
       </section>
@@ -143,13 +159,19 @@
   <script>
     const byId = (id) => document.getElementById(id);
     const form = byId('editor');
-    const fields = ['name', 'category', 'price', 'description', 'features'];
+    const fields = ['name', 'category', 'price', 'description', 'features', 'brand', 'sku', 'color', 'seller', 'bank-price', 'old-price', 'photo-links'];
     const sample = {
       name: 'Беспроводные наушники Studio One',
       category: 'Электроника',
       price: '3490',
       description: 'Накладные наушники для музыки и звонков. Мягкие амбушюры и регулируемое оголовье помогают удобно разместить их на голове.',
-      features: 'Bluetooth 5.3\nДо 30 часов работы\nЦвет: графитовый'
+      features: 'Тип: Наушники\nТип беспроводной связи: Bluetooth 5.3\nВремя работы: До 30 часов\nНаличие микрофона: Да\nКонструкция наушников: Накладные',
+      brand: 'Studio One',
+      sku: 'STUDIO-ONE',
+      color: 'графитовый',
+      seller: 'Studio One',
+      'bank-price': '3190',
+      'old-price': '4990'
     };
     const currency = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
     const photoInput = byId('photo');
@@ -158,20 +180,27 @@
     let demoPhoto = false;
     let photoUrl = '';
     let photoAttempt = 0;
+    let shareAttempt = 0;
+
+    function priceValue(value) {
+      const amount = value.replace(/\s/g, '').replace(',', '.');
+      return /^\d+(\.\d{1,2})?$/.test(amount) && Number(amount) <= 999999999 ? Number(amount) : null;
+    }
 
     function readCard() {
       const card = Object.fromEntries(fields.map((key) => [key, byId(key).value.trim()]));
-      const amount = card.price.replace(/\s/g, '').replace(',', '.');
-      const validPrice = /^\d+(\.\d{1,2})?$/.test(amount) && Number(amount) <= 999999999;
+      const amount = priceValue(card.price);
       return {
         ...card,
-        invalidPrice: Boolean(card.price) && !validPrice,
-        formattedPrice: validPrice ? currency.format(Number(amount)) + ' ₽' : '',
+        invalidPrice: Boolean(card.price) && amount === null,
+        formattedPrice: amount === null ? '' : currency.format(amount) + ' ₽',
         tags: card.features.split('\n').map((line) => line.trim()).filter(Boolean)
       };
     }
 
     function render() {
+      shareAttempt += 1;
+      byId('share-result').hidden = true;
       const card = readCard();
       byId('count').textContent = byId('name').value.length + ' / 100';
       byId('price-hint').hidden = !card.invalidPrice;
@@ -244,6 +273,93 @@
       byId('file-name').textContent = file.name;
       status.textContent = 'Фото добавлено.';
       render();
+    });
+
+    async function photoForLink() {
+      if (!photoUrl) return '';
+      const image = new Image();
+      image.src = photoUrl;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      for (const maxSize of [760, 600, 440, 300]) {
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const source = canvas.toDataURL('image/webp', .64);
+        if (source.length < 56000) return source;
+      }
+      throw new Error('Фото слишком большое для ссылки. Укажите прямую HTTPS-ссылку на него.');
+    }
+
+    function photoLinks(value) {
+      const links = value.split('\n').map((line) => line.trim()).filter(Boolean);
+      if (links.length > 5) throw new Error('Добавьте не более пяти ссылок на фото.');
+      return links.map((link) => {
+        let url;
+        try { url = new URL(link); } catch { throw new Error('Проверьте ссылки на фото. Нужны полные адреса HTTPS.'); }
+        if (url.protocol !== 'https:' || url.username || url.password) throw new Error('Укажите прямую HTTPS-ссылку на фото.');
+        return url.href;
+      });
+    }
+
+    async function packCard(card) {
+      const stream = new Blob([JSON.stringify(card)]).stream().pipeThrough(new CompressionStream('gzip'));
+      const bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+      return bytes.toBase64 ? bytes.toBase64({ alphabet: 'base64url', omitPadding: true })
+        : btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join('')).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+    }
+
+    byId('make-link').addEventListener('click', async () => {
+      const attempt = ++shareAttempt;
+      const card = readCard();
+      const price = priceValue(card.price);
+      const bankPrice = priceValue(card['bank-price']);
+      const oldPrice = priceValue(card['old-price']);
+      byId('share-result').hidden = true;
+      if (!card.name || price === null) {
+        byId(card.name ? 'price' : 'name').focus();
+        status.textContent = 'Укажите название и корректную цену.';
+        return;
+      }
+      if ((card['bank-price'] && bankPrice === null) || (card['old-price'] && oldPrice === null)) {
+        status.textContent = 'Проверьте дополнительные цены.';
+        return;
+      }
+      status.textContent = 'Готовим ссылку…';
+      try {
+        const links = photoLinks(card['photo-links']);
+        const upload = await photoForLink();
+        const data = {
+          name: card.name, category: card.category, description: card.description, tags: card.tags,
+          brand: card.brand, sku: card.sku, color: card.color, seller: card.seller,
+          price, bankPrice, oldPrice, images: upload ? [upload, ...links] : links, demo: demoPhoto && !links.length
+        };
+        const url = new URL('product.html', location.href);
+        url.hash = 'v1=' + await packCard(data);
+        if (attempt !== shareAttempt) return;
+        byId('share-url').value = url.href;
+        byId('open-layout').href = url.href;
+        byId('share-result').hidden = false;
+        status.textContent = location.protocol === 'file:'
+          ? 'Макет можно открыть локально. Для публичной ссылки откройте конструктор на GitHub Pages.'
+          : 'Ссылка на макет готова.';
+      } catch (error) {
+        if (attempt === shareAttempt) status.textContent = error.message || 'Не удалось создать ссылку.';
+      }
+    });
+
+    byId('copy-link').addEventListener('click', async () => {
+      const field = byId('share-url');
+      field.focus();
+      field.select();
+      try {
+        await navigator.clipboard.writeText(field.value);
+        status.textContent = 'Ссылка скопирована.';
+      } catch {
+        status.textContent = 'Ссылка выделена. Скопируйте её сочетанием Ctrl+C.';
+      }
     });
 
     byId('copy').addEventListener('click', async () => {
