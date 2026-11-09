@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Соберите черновик карточки товара и сразу посмотрите, как он выглядит.">
+  <title>Карточка — конструктор для продавцов</title>
+  <style>
+    :root { color-scheme: light; --ink: #201b2d; --muted: #61596f; --line: #e8e3ef; --purple: #5c36bd; --soft: #f3edff; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; color: var(--ink); background: #f8f6fc; font: 15px/1.5 system-ui, sans-serif; }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #8f69ed; outline-offset: 3px; }
+    .wrap { width: min(1100px, calc(100% - 48px)); margin-inline: auto; }
+    .top { background: #fff; border-bottom: 1px solid var(--line); }
+    .top .wrap { min-height: 64px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .brand { display: flex; gap: 10px; align-items: center; font-weight: 800; font-size: 18px; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; background: var(--purple); color: white; border-radius: 10px; }
+    .top-note, .eyebrow, .step, .live { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .top-note { color: var(--muted); text-align: right; }
+    .hero { padding: 45px 0 28px; }
+    .eyebrow { color: var(--purple); margin: 0 0 9px; }
+    h1 { margin: 0; font-size: clamp(31px, 5vw, 54px); line-height: 1.08; letter-spacing: -.05em; }
+    .intro { color: var(--muted); margin: 13px 0 0; font-size: 16px; }
+    .grid { display: grid; grid-template-columns: 1.16fr 1fr; align-items: start; gap: 22px; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 22px; background: white; box-shadow: 0 8px 28px #321a6410; }
+    .editor { padding: 24px; }
+    .panel-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+    .step { color: var(--purple); margin: 0 0 2px; }
+    h2 { margin: 0; font-size: 23px; letter-spacing: -.035em; }
+    .quiet { border: 0; border-radius: 9px; padding: 7px 10px; background: var(--soft); color: var(--purple); font-size: 13px; font-weight: 700; }
+    .field { display: grid; gap: 5px; min-width: 0; }
+    .field label, .photo-label { font-weight: 700; font-size: 13px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .full { grid-column: 1 / -1; }
+    input:not([type=file]), select, textarea { width: 100%; min-width: 0; border: 1px solid #ded7e9; border-radius: 9px; padding: 9px 11px; color: var(--ink); background: #fcfbfe; }
+    textarea { resize: vertical; min-height: 65px; }
+    .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .hint { margin: 0; color: var(--muted); font-size: 12px; }
+    .upload { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px; border: 1px dashed #cbbde8; border-radius: 10px; background: #faf7ff; }
+    .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .upload input:focus-visible + label { outline: 3px solid #8f69ed; outline-offset: 3px; }
+    .upload label { display: inline-block; cursor: pointer; }
+    .file-name { overflow-wrap: anywhere; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 17px; }
+    .primary, .secondary { border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; font-weight: 700; }
+    .primary { color: white; background: var(--purple); }
+    .primary:hover { background: #48269d; }
+    .secondary { border-color: var(--line); color: var(--ink); background: white; }
+    .secondary:hover, .quiet:hover { background: #ede4ff; }
+    .status { min-height: 1.5em; margin-top: 7px; }
+    .preview { padding: 21px; position: sticky; top: 16px; }
+    .live { display: inline-flex; align-items: center; gap: 7px; padding: 5px 9px; color: #345b46; background: #eaf8ef; border-radius: 20px; white-space: nowrap; }
+    .live::before { content: ''; width: 7px; height: 7px; background: #388b5b; border-radius: 50%; }
+    .product { border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+    .visual { position: relative; display: grid; place-items: center; aspect-ratio: 1.52; overflow: hidden; background: #eee7fb; }
+    .visual svg, .visual img { width: 100%; height: 100%; position: absolute; }
+    .visual img { object-fit: contain; background: #f6f2fb; }
+    .demo-tag { position: absolute; left: 12px; top: 12px; padding: 4px 8px; border-radius: 6px; background: white; color: #514260; font-size: 11px; font-weight: 700; }
+    .details { padding: 17px; overflow-wrap: anywhere; }
+    .category { margin: 0 0 3px; color: var(--purple); font-size: 12px; font-weight: 750; }
+    h3 { font-size: 21px; line-height: 1.25; letter-spacing: -.02em; margin: 0; }
+    .price { color: var(--purple); font-size: 26px; font-weight: 800; margin: 8px 0; }
+    .description { color: var(--muted); margin: 0; white-space: pre-wrap; }
+    .specs { display: flex; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 12px 0 0; }
+    .specs li { padding: 4px 8px; border-radius: 6px; background: var(--soft); color: #4d3680; font-size: 12px; }
+    footer { padding: 22px 0 30px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 750px) { .grid { grid-template-columns: 1fr; } .preview { position: static; } .hero { padding-top: 32px; } }
+    @media (max-width: 410px) { .wrap { width: calc(100% - 24px); } .editor, .preview { padding: 15px; } .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 13h4m-4 3h7"/></svg></span>Карточка</div>
+      <span class="top-note">Учебный проект · Ozon</span>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="title">
+      <p class="eyebrow">Инструмент продавца</p>
+      <h1 id="title">Конструктор карточки товара</h1>
+      <p class="intro">Заполните данные о товаре и сразу посмотрите, как будет выглядеть карточка.</p>
+    </section>
+    <div class="grid">
+      <section class="panel editor" aria-labelledby="editor-title">
+        <div class="panel-head">
+          <div><p class="step">01 / Редактор</p><h2 id="editor-title">Данные товара</h2></div>
+          <button class="quiet" type="button" id="demo">Загрузить пример</button>
+        </div>
+        <form id="editor">
+          <div class="form-grid">
+            <div class="field full">
+              <div class="label-row"><label for="name">Название</label><span id="count" class="hint" aria-hidden="true"></span></div>
+              <input id="name" name="name" maxlength="100" placeholder="Например, беспроводные наушники">
+            </div>
+            <div class="field"><label for="category">Категория</label><select id="category" name="category"><option value="">Выберите категорию</option><option>Электроника</option><option>Дом и сад</option><option>Одежда и обувь</option><option>Красота и уход</option><option>Спорт и отдых</option><option>Детские товары</option><option>Другое</option></select></div>
+            <div class="field"><label for="price">Цена, ₽</label><input id="price" name="price" inputmode="decimal" maxlength="14" placeholder="Например, 3490" aria-describedby="price-hint"><p class="hint" id="price-hint" hidden>Введите цену от 0 до 999 999 999 ₽.</p></div>
+            <div class="field full"><label for="description">Описание</label><textarea id="description" name="description" rows="2" maxlength="1500" placeholder="Расскажите, чем товар пригодится покупателю"></textarea></div>
+            <div class="field full"><label for="features">Характеристики</label><textarea id="features" name="features" rows="2" maxlength="500" placeholder="Каждая характеристика с новой строки" aria-describedby="features-hint"></textarea><p class="hint" id="features-hint">Например, «Цвет: чёрный». Каждая строка станет отдельной меткой.</p></div>
+            <div class="field full"><span class="photo-label">Фото товара</span><div class="upload">
+              <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="file-name"><label class="quiet" for="photo">Выбрать фото</label><span id="file-name" class="hint file-name">JPG, PNG или WebP до 10 МБ</span><button class="quiet" id="remove-photo" type="button" hidden>Убрать фото</button>
+            </div></div>
+          </div>
+          <div class="actions"><button class="primary" type="button" id="copy">Скопировать текст</button><button class="secondary" type="button" id="clear">Очистить</button></div>
+          <p id="status" class="hint status" role="status"></p>
+        </form>
+      </section>
+      <section class="panel preview" aria-labelledby="preview-title">
+        <div class="panel-head"><div><p class="step">02 / Витрина</p><h2 id="preview-title">Предпросмотр</h2></div><span class="live">Обновляется сразу</span></div>
+        <article class="product" aria-labelledby="product-name">
+          <div class="visual">
+            <svg id="art" viewBox="0 0 520 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs>
+                <radialGradient id="bg" cx="53%" cy="43%" r="70%"><stop stop-color="#f7f0ff"/><stop offset="1" stop-color="#d7c6f2"/></radialGradient>
+                <linearGradient id="band" x2=".75" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#544966"/><stop offset=".48" stop-color="#292335"/><stop offset="1" stop-color="#1a1723"/></linearGradient>
+                <linearGradient id="cup" x2="1" y2="1"><stop stop-color="#534a62"/><stop offset=".55" stop-color="#2f293d"/><stop offset="1" stop-color="#191622"/></linearGradient>
+                <radialGradient id="shadow"><stop stop-color="#3b254f" stop-opacity=".28"/><stop offset="1" stop-color="#3b254f" stop-opacity="0"/></radialGradient>
+              </defs>
+              <rect width="520" height="340" fill="url(#bg)"/>
+              <g fill="none" stroke="#fff" opacity=".55"><circle cx="264" cy="165" r="126"/><circle cx="264" cy="165" r="151"/><circle cx="264" cy="165" r="177"/></g>
+              <ellipse cx="269" cy="292" rx="134" ry="24" fill="url(#shadow)"/>
+              <g transform="rotate(-12 260 169)">
+                <path d="M161 204v-38c0-64 40-111 100-111s100 47 100 111v38" fill="none" stroke="url(#band)" stroke-width="23" stroke-linecap="round"/>
+                <path d="M168 159c4-56 40-97 93-97s90 41 93 97" fill="none" stroke="#81768d" stroke-width="2" opacity=".66"/>
+                <path d="M159 170v40m203-40v40" stroke="#b6aabe" stroke-width="8" stroke-linecap="round"/>
+                <g transform="rotate(-10 171 222)"><rect x="140" y="177" width="58" height="92" rx="26" fill="url(#cup)"/><rect x="179" y="180" width="26" height="88" rx="12" fill="#262030"/><path d="M152 202v40" stroke="#8d809a" stroke-width="2" opacity=".48" stroke-linecap="round"/></g>
+                <g transform="rotate(10 347 222)"><rect x="315" y="180" width="27" height="88" rx="12" fill="#211b2c"/><rect x="328" y="177" width="59" height="92" rx="26" fill="url(#cup)"/><path d="M373 199v36" stroke="#9489a4" stroke-width="2" opacity=".6" stroke-linecap="round"/><circle cx="364" cy="248" r="2.5" fill="#bc9eff"/></g>
+              </g>
+            </svg>
+            <img id="product-photo" alt="Фото товара" hidden>
+            <span id="demo-tag" class="demo-tag">Фото из примера</span>
+            <span id="empty-photo" class="hint" hidden>Здесь будет фото товара</span>
+          </div>
+          <div class="details"><p class="category" id="product-category"></p><h3 id="product-name"></h3><p class="price" id="product-price"></p><p class="description" id="product-description"></p><ul class="specs" id="product-features" aria-label="Характеристики" hidden></ul></div>
+        </article>
+      </section>
+    </div>
+    <footer>Учебный конструктор для продавцов Ozon. Фото и черновик обрабатываются в вашем браузере.</footer>
+  </main>
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const form = byId('editor');
+    const fields = ['name', 'category', 'price', 'description', 'features'];
+    const sample = {
+      name: 'Беспроводные наушники Studio One',
+      category: 'Электроника',
+      price: '3490',
+      description: 'Накладные наушники для музыки и звонков. Мягкие амбушюры и регулируемое оголовье помогают удобно разместить их на голове.',
+      features: 'Bluetooth 5.3\nДо 30 часов работы\nЦвет: графитовый'
+    };
+    const currency = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
+    const photoInput = byId('photo');
+    const photo = byId('product-photo');
+    const status = byId('status');
+    let demoPhoto = false;
+    let photoUrl = '';
+    let photoAttempt = 0;
+
+    function readCard() {
+      const card = Object.fromEntries(fields.map((key) => [key, byId(key).value.trim()]));
+      const amount = card.price.replace(/\s/g, '').replace(',', '.');
+      const validPrice = /^\d+(\.\d{1,2})?$/.test(amount) && Number(amount) <= 999999999;
+      return {
+        ...card,
+        invalidPrice: Boolean(card.price) && !validPrice,
+        formattedPrice: validPrice ? currency.format(Number(amount)) + ' ₽' : '',
+        tags: card.features.split('\n').map((line) => line.trim()).filter(Boolean)
+      };
+    }
+
+    function render() {
+      const card = readCard();
+      byId('count').textContent = byId('name').value.length + ' / 100';
+      byId('price-hint').hidden = !card.invalidPrice;
+      byId('price').setAttribute('aria-invalid', String(card.invalidPrice));
+      byId('product-category').textContent = card.category || 'Категория товара';
+      byId('product-name').textContent = card.name || 'Название товара';
+      byId('product-price').textContent = card.formattedPrice || 'Цена не указана';
+      byId('product-description').textContent = card.description || 'Здесь появится описание товара.';
+      const list = byId('product-features');
+      list.replaceChildren(...card.tags.map((tag) => {
+        const item = document.createElement('li');
+        item.textContent = tag;
+        return item;
+      }));
+      list.hidden = card.tags.length === 0;
+      photo.alt = card.name ? 'Фото товара «' + card.name + '»' : 'Фото товара';
+      photo.hidden = !photoUrl;
+      byId('art').hidden = !demoPhoto || Boolean(photoUrl);
+      byId('demo-tag').hidden = byId('art').hidden;
+      byId('empty-photo').hidden = demoPhoto || Boolean(photoUrl);
+      byId('remove-photo').hidden = !photoUrl && !demoPhoto;
+    }
+
+    function resetPhoto(useDemo) {
+      photoAttempt += 1;
+      if (photoUrl) URL.revokeObjectURL(photoUrl);
+      photoUrl = '';
+      photo.removeAttribute('src');
+      photoInput.value = '';
+      demoPhoto = useDemo;
+      byId('file-name').textContent = 'JPG, PNG или WebP до 10 МБ';
+    }
+
+    function loadCard(values, useDemo) {
+      for (const key of fields) byId(key).value = values[key] || '';
+      resetPhoto(useDemo);
+      render();
+    }
+
+    form.addEventListener('submit', (event) => event.preventDefault());
+    form.addEventListener('input', () => { status.textContent = ''; render(); });
+    byId('demo').addEventListener('click', () => { loadCard(sample, true); status.textContent = 'Пример загружен.'; });
+    byId('clear').addEventListener('click', () => { loadCard({}, false); status.textContent = 'Поля очищены.'; byId('name').focus(); });
+    byId('remove-photo').addEventListener('click', () => { resetPhoto(false); render(); photoInput.focus(); status.textContent = 'Фото убрано.'; });
+
+    photoInput.addEventListener('change', async () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+      const attempt = ++photoAttempt;
+      photoInput.value = '';
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024) {
+        status.textContent = 'Выберите JPG, PNG или WebP размером до 10 МБ.';
+        return;
+      }
+      const nextUrl = URL.createObjectURL(file);
+      const candidate = new Image();
+      candidate.src = nextUrl;
+      try {
+        await candidate.decode();
+      } catch {
+        URL.revokeObjectURL(nextUrl);
+        if (attempt === photoAttempt) status.textContent = 'Не удалось открыть изображение. Попробуйте другой файл.';
+        return;
+      }
+      if (attempt !== photoAttempt) { URL.revokeObjectURL(nextUrl); return; }
+      if (photoUrl) URL.revokeObjectURL(photoUrl);
+      demoPhoto = false;
+      photoUrl = nextUrl;
+      photo.src = photoUrl;
+      byId('file-name').textContent = file.name;
+      status.textContent = 'Фото добавлено.';
+      render();
+    });
+
+    byId('copy').addEventListener('click', async () => {
+      const card = readCard();
+      if (card.invalidPrice) { byId('price').focus(); status.textContent = 'Исправьте цену перед копированием.'; return; }
+      const text = [card.name, card.category, card.formattedPrice, card.description, card.tags.map((tag) => '• ' + tag).join('\n')].filter(Boolean).join('\n\n');
+      if (!text) { status.textContent = 'Заполните хотя бы одно поле с данными товара.'; return; }
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = 'Текст карточки скопирован.';
+      } catch {
+        const box = document.createElement('textarea');
+        box.value = text;
+        box.style.cssText = 'position:fixed;left:-9999px;top:0';
+        document.body.append(box);
+        box.select();
+        const copied = document.execCommand('copy');
+        box.remove();
+        byId('copy').focus();
+        status.textContent = copied ? 'Текст карточки скопирован.' : 'Браузер заблокировал копирование.';
+      }
+    });
+
+    loadCard(sample, true);
+  </script>
+</body>
+</html>
