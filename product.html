@@ -39,9 +39,9 @@
     .location { display:flex; align-items:center; gap:6px; }
     .location b { color:var(--blue); }
     .flag { display:inline-block; width:18px; height:12px; background:linear-gradient(white 33%,#005bff 33% 66%,#f13c56 66%); border:1px solid #eee; }
-    .banner { display:grid; position:relative; place-items:center; height:32px; overflow:hidden; border-radius:20px; background:#00a4eb; color:white; font-size:21px; }
-    .banner img { position:absolute; width:100%; height:100%; inset:0; object-fit:cover; }
-    .meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; align-items:center; margin:34px 0 10px; color:var(--muted); font-weight:600; }
+    .meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:5px 14px; align-items:center; min-height:22px; margin:10px 0 10px; color:var(--muted); font-weight:600; }
+    .breadcrumbs { display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; min-width:0; }
+    .breadcrumbs span + span::before { content:'•'; padding-right:8px; color:#98a5af; }
     .demo-label { padding:2px 8px; border-radius:8px; background:var(--wash); color:var(--muted); font-size:11px; font-weight:700; white-space:nowrap; }
     .meta button { display:inline-flex; align-items:center; gap:5px; background:none; border:0; color:inherit; padding:2px 0 2px 10px; }
     .meta svg.icon { width:16px; height:16px; }
@@ -59,10 +59,17 @@
     .info { min-width:0; overflow-wrap:anywhere; }
     .info h1 { margin:0 0 12px; color:#070707; font-size:24px; line-height:30px; font-weight:700; }
     .info h1.clamped { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
-    .title-more { border:0; padding:0; margin:-7px 0 8px auto; display:block; color:var(--muted); background:none; font-weight:700; }
-    .summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:13px; }
-    .summary a { color:var(--muted); font-weight:600; }
-    .star { color:#f6a200; }
+    .title-more { position:absolute; bottom:0; right:0; border:0; padding:0 0 2px 20px; color:var(--muted); background:linear-gradient(90deg,#fff0,#fff 30%); font-weight:700; }
+    .title-more[aria-expanded="true"]:not([hidden]) { position:static; display:block; margin:-8px 0 10px auto; background:none; }
+    .title-block { position:relative; }
+    .title-block:has(.clamped + .title-more:not([hidden])) h1 { padding-right:28px; }
+    .summary { display:flex; gap:6px 13px; flex-wrap:wrap; margin:0 0 16px; }
+    .summary a { display:inline-flex; gap:6px; align-items:center; color:var(--muted); font-size:16px; font-weight:600; }
+    .summary .icon { width:15px; height:15px; }
+    .star { color:#f6a200; font-size:19px; }
+    .variant { margin:0 0 14px; }
+    .variant-label { display:block; margin:0 0 8px; color:var(--muted); }
+    .variant-value { display:inline-block; max-width:100%; padding:10px 15px; border:2px solid var(--blue); border-radius:6px; background:#fff; font-weight:600; text-align:center; }
     .color { margin:0 0 10px; }
     .color span { color:var(--muted); }
     .swatch { width:53px; height:70px; padding:3px; margin:0 0 13px; border:2px solid var(--blue); border-radius:6px; object-fit:contain; background:var(--wash); }
@@ -83,17 +90,19 @@
     .price-line { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
     .amount { display:inline-block; font-size:28px; font-weight:750; letter-spacing:-.02em; line-height:30px; white-space:nowrap; }
     .bank-amount { color:white; background:var(--green); border-radius:8px; padding:3px 6px; }
-    .bank-icon { display:grid; place-items:center; width:22px; height:22px; color:var(--blue); background:#eaf3ff; border-radius:50%; font-size:10px; font-weight:850; }
+    .bank-icon { display:inline-block; color:var(--blue); font-size:9px; line-height:.95; font-weight:850; text-align:center; }
     .other-price { color:var(--muted); margin:5px 0 0; }
     .other-price strong { font-size:20px; line-height:24px; color:#516170; }
     .other-price s { margin:0 2px; }
+    .price-unit { margin:5px 0 0; color:var(--muted); }
+    .price-detail { display:flex; gap:6px; align-items:center; margin:10px 0; }
+    .price-detail span { display:grid; place-items:center; width:16px; height:16px; border-radius:6px; background:var(--green); color:white; font-weight:800; }
     .mock-pay { background:#f5f5fa; border-radius:12px; min-height:56px; margin:12px 0; padding:10px 12px; display:flex; align-items:center; gap:8px; color:#070707; font-weight:700; }
     .mock-pay span { background:#6350d7; color:white; border-radius:7px; padding:7px 8px; display:inline-block; }
     .ship { display:flex; align-items:center; gap:6px; background:var(--wash); border:0; border-radius:12px; width:100%; min-height:42px; padding:9px 12px; margin:0 0 12px; color:var(--ink); text-align:left; }
     .ship svg { width:17px; height:17px; }
     .buy-row { display:flex; gap:8px; }
-    .cart { flex:1; flex-direction:column; gap:2px; min-height:56px; border-radius:16px; font-size:16px; }
-    .cart small { font-size:12px; font-weight:400; }
+    .cart { flex:1; min-height:56px; border-radius:16px; font-size:16px; }
     .heart, .buy-now { background:#e7f4ff; color:var(--blue); }
     .heart { min-width:56px; border-radius:16px; padding:0; }
     .heart[aria-pressed="true"] svg { fill:currentColor; }
@@ -118,7 +127,7 @@
     footer { margin-top:36px; padding:20px 0; background:var(--wash); color:var(--muted); }
     @media (max-width:1050px) { .subnav li:nth-child(n+6) { display:none; } .header-row { gap:10px; padding-inline:0; } .subnav { padding-inline:0; } .product-grid { gap:16px; } .box { padding:15px; } }
     @media (max-width:850px) { .wrap { width:calc(100% - 32px); } .product-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } .purchase { grid-column:2; } .gallery { grid-row:span 2; } .header-row { grid-template-columns:110px 108px minmax(100px,1fr) 80px; } .header-icons { gap:12px; } .header-icons > :nth-child(-n+2) { display:none; } .subnav li:nth-child(n+4) { display:none; } }
-    @media (max-width:610px) { .wrap { width:calc(100% - 24px); } .header-row { grid-template-columns:78px minmax(0,1fr) auto; min-height:57px; } .logo { font-size:26px; letter-spacing:-2px; } .catalog,.subnav,.search-box span,.search-box svg { display:none; } .search { height:36px; } .search input { padding-left:8px; font-size:14px; } .search button { width:32px; } .header-icons { padding:0; } .header-icons > :not(:last-child) { display:none; } .banner { height:25px; font-size:14px; } .banner img { object-fit:contain; } .meta { margin-top:17px; } .product-grid { display:flex; flex-direction:column; } .gallery,.info,.purchase { width:100%; } .gallery { grid-template-columns:47px minmax(0,1fr); } .frame { max-height:490px; } .info h1 { font-size:22px; } .below { margin-top:24px; } }
+    @media (max-width:610px) { .wrap { width:calc(100% - 24px); } .header-row { grid-template-columns:78px minmax(0,1fr) auto; min-height:57px; } .logo { font-size:26px; letter-spacing:-2px; } .catalog,.subnav,.search-box span,.search-box svg { display:none; } .search { height:36px; } .search input { padding-left:8px; font-size:14px; } .search button { width:32px; } .header-icons { padding:0; } .header-icons > :not(:last-child) { display:none; } .meta { margin-top:10px; } .product-grid { display:flex; flex-direction:column; } .gallery,.info,.purchase { width:100%; } .gallery { grid-template-columns:minmax(0,1fr); } .frame { grid-row:1; max-height:490px; } .thumbs { display:flex; overflow-x:auto; padding:2px; } .thumb { flex:0 0 48px; } .info h1 { font-size:22px; } .below { margin-top:24px; } }
   </style>
 </head>
 <body>
@@ -143,21 +152,20 @@
       <div class="header-icons" aria-hidden="true"><span><svg class="icon"><use href="#i-user"/></svg></span><span><svg class="icon"><use href="#i-box"/></svg></span><span><svg class="icon"><use href="#i-heart"/></svg></span><span><svg class="icon"><use href="#i-cart"/></svg></span></div>
     </div>
     <div class="wrap subnav"><ul aria-label="Разделы в макете"><li>▰ Ozon Банк</li><li>✈ Билеты, отели</li><li>Для бизнеса ⌄</li><li>Одежда</li><li>Электроника</li><li>Товары за 1 ₽</li><li>Сертификаты</li><li>Склад для Ozon</li></ul><span class="location">Тюмень · <b>Укажите адрес</b><span class="flag" aria-hidden="true"></span> RU</span></div>
-    <div class="banner"><strong>Учебный макет карточки товара</strong><img data-brand-asset src="https://ir.ozone.ru/s3/cms/a7/t34/wc1450/pomoch_4320_96.png" alt=""></div>
   </header>
   <main class="wrap">
     <div id="missing" class="empty-state" hidden><h1>Карточка не найдена</h1><p>Откройте полную ссылку из конструктора.</p><a href="./">Перейти в конструктор</a></div>
     <div id="page" hidden>
-      <div class="meta"><span id="breadcrumbs"></span><div class="links"><span class="demo-label">Учебный макет</span><button type="button" id="sku" hidden><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span id="sku-text"></span></button><button type="button" id="compare" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-compare"/></svg><span>В сравнение</span></button><button type="button" id="share"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>Поделиться</button></div></div>
+      <div class="meta"><nav id="breadcrumbs" class="breadcrumbs" aria-label="Категория товара"></nav><div class="links"><span class="demo-label">Учебный макет</span><button type="button" id="sku" hidden><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span id="sku-text"></span></button><button type="button" id="compare" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-compare"/></svg><span>В сравнение</span></button><button type="button" id="share"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>Поделиться</button></div></div>
       <div class="product-grid">
         <section class="gallery" aria-label="Галерея товара">
           <div class="thumbs" id="thumbs"></div>
           <figure class="frame"><span id="empty-image">Фото товара</span><img id="main-image" alt="" hidden><button class="photo-action" id="open-photo" type="button" hidden>Увеличить</button><span id="image-counter" class="image-counter" hidden></span></figure>
         </section>
         <section class="info" aria-labelledby="name">
-          <h1 id="name" class="clamped"></h1>
-          <button class="title-more" type="button" id="title-more" aria-controls="name" aria-expanded="false" hidden>ещё</button>
-          <div class="summary"><a href="#reviews"><span class="star" aria-hidden="true">★</span> Нет отзывов</a><a href="#questions">Вопросы</a></div>
+          <div class="title-block"><h1 id="name" class="clamped"></h1><button class="title-more" type="button" id="title-more" aria-controls="name" aria-expanded="false" hidden>ещё</button></div>
+          <div class="summary"><a href="#reviews"><span class="star" aria-hidden="true">★</span> Нет отзывов</a><a href="#questions"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM10 9a2 2 0 0 1 4 0c0 1.5-2 1.5-2 3m0 2h.01"/></svg>Вопросы</a></div>
+          <div id="variants"></div>
           <p class="color" id="color-row" hidden><span>Цвет:</span> <b id="color"></b></p>
           <img id="swatch" class="swatch" alt="" hidden>
           <div class="section-head"><h2>О товаре</h2><a href="#description">Перейти к описанию ›</a></div>
@@ -167,11 +175,13 @@
         <aside class="purchase" aria-label="Цена и продавец">
           <div class="sale" id="sale" hidden><span class="sale-dot" aria-hidden="true"></span><div>Распродажа ›<small>Цена со скидкой</small></div><strong id="discount"></strong></div>
           <div class="box">
-            <div class="price-line" id="bank-row" hidden><strong class="amount bank-amount" id="bank-price"></strong><span>с Ozon Картой</span><span class="bank-icon" aria-hidden="true">O₽</span></div>
+            <div class="price-line" id="bank-row" hidden><strong class="amount bank-amount" id="bank-price"></strong><span>с Ozon Картой</span><span class="bank-icon" aria-hidden="true">ozon<br>банк</span></div>
             <div class="price-line" id="price-row"><strong id="price" class="amount"></strong><s id="old-price" hidden></s><span id="price-note" hidden>с другими банками</span></div>
-            <p class="mock-pay"><span>Оплатить позже</span> Варианты оплаты на Ozon</p>
+            <p id="price-unit" class="price-unit" hidden></p>
+            <p id="price-detail" class="price-detail" hidden><span aria-hidden="true">↓</span>Цена со скидкой</p>
+            <p class="mock-pay" id="payment-options"><span>Оплатить позже</span> Варианты оплаты на Ozon</p>
             <button class="ship" id="discount-request" type="button"><svg class="icon" aria-hidden="true"><use href="#i-discount"/></svg>Хочу скидку</button>
-            <div class="buy-row"><button class="button cart" id="cart" type="button">В корзину<small>Доставка зависит от региона</small></button><button class="button heart" id="favorite" type="button" aria-label="В избранное" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg></button></div>
+            <div class="buy-row"><button class="button cart" id="cart" type="button">В корзину</button><button class="button heart" id="favorite" type="button" aria-label="В избранное" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg></button></div>
           </div>
           <div class="seller" id="seller-box" hidden><span class="seller-icon"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg><img id="seller-photo" alt="" hidden></span><div><p>Продавец</p><strong id="seller"></strong></div></div>
           <button class="button buy-now" id="buy" type="button">Купить сейчас</button>
@@ -330,8 +340,16 @@
       document.title = name + ' · Учебный макет Ozon';
       byId('name').textContent = name;
       const category = text(card.category, 60);
-      const trail = category === 'Электроника' && /наушник/i.test(name) ? [category, 'Наушники и аудиотехника', 'Наушники'] : [category || 'Каталог'];
-      byId('breadcrumbs').textContent = trail.join('  ·  ');
+      const bathBombs = category === 'Красота и уход' && /бомбочк.*ванн/i.test(name);
+      let trail = [category || 'Каталог'];
+      if (category === 'Электроника' && /наушник/i.test(name)) trail = [category, 'Наушники и аудиотехника', 'Наушники'];
+      if (bathBombs) trail = ['Красота и здоровье', 'Уход за телом', 'Средства для принятия ванны', 'Бомбочки'];
+      if (brand) trail.push(brand);
+      byId('breadcrumbs').replaceChildren(...trail.map((label) => {
+        const part = document.createElement('span');
+        part.textContent = label;
+        return part;
+      }));
       byId('sku-text').textContent = 'Артикул: ' + sku;
       byId('sku').hidden = !sku;
       byId('sku').addEventListener('click', async () => {
@@ -352,6 +370,18 @@
         facts.push(separator > 0 ? [line.slice(0, separator).trim(), line.slice(separator + 1).trim()] : ['Особенность', line]);
       }
       const specs = brand ? [['Бренд', brand], ...facts] : facts;
+      for (const [label, value] of facts.filter(([key, value]) => value && /^(аромат(ы)?|объ[её]м(, мл)?|в наборе)$/i.test(key)).slice(0, 2)) {
+        const row = document.createElement('div');
+        const title = document.createElement('span');
+        const option = document.createElement('span');
+        row.className = 'variant';
+        title.className = 'variant-label';
+        title.textContent = label + ':';
+        option.className = 'variant-value';
+        option.textContent = value;
+        row.append(title, option);
+        byId('variants').append(row);
+      }
       addSpecs(byId('short-specs'), specs.slice(0, 5));
       addSpecs(byId('full-specs'), specs);
       byId('no-specs').hidden = byId('no-full-specs').hidden = Boolean(specs.length);
@@ -364,19 +394,26 @@
         sellerPhoto.addEventListener('load', () => { sellerPhoto.hidden = false; });
         sellerPhoto.src = images[0];
       }
-      const bank = isPrice(card.bankPrice);
+      const demoPricing = card.design?.photo === 'capybara' && name === 'Бомбочки для ванны «Капибары»' && card.price === 890;
+      const bankPrice = card.bankPrice ?? (demoPricing ? 790 : null);
+      const oldPrice = card.oldPrice ?? (demoPricing ? 1190 : null);
+      const bank = isPrice(bankPrice);
       const price = isPrice(card.price);
-      const old = price && isPrice(card.oldPrice) && card.oldPrice > card.price;
+      const old = price && isPrice(oldPrice) && oldPrice > card.price;
       byId('bank-row').hidden = !bank;
-      if (bank) byId('bank-price').textContent = formatPrice.format(card.bankPrice);
+      if (bank) byId('bank-price').textContent = formatPrice.format(bankPrice);
       byId('price').textContent = price ? formatPrice.format(card.price) : 'Цена не указана';
       byId('price-row').classList.toggle('other-price', bank);
       byId('price-note').hidden = !bank;
       byId('old-price').hidden = !old;
       byId('sale').hidden = !old;
+      byId('price-detail').hidden = !old;
+      byId('payment-options').hidden = !price && !bank;
+      byId('price-unit').hidden = !price || !bathBombs || !facts.some(([key]) => /^в наборе$/i.test(key));
+      if (!byId('price-unit').hidden) byId('price-unit').textContent = formatPrice.format(card.price) + ' за набор';
       if (old) {
-        byId('old-price').textContent = formatPrice.format(card.oldPrice);
-        byId('discount').textContent = '−' + Math.round((1 - card.price / card.oldPrice) * 100) + '%';
+        byId('old-price').textContent = formatPrice.format(oldPrice);
+        byId('discount').textContent = '−' + Math.round((1 - card.price / oldPrice) * 100) + '%';
       }
       byId('page').hidden = false;
       const title = byId('name');

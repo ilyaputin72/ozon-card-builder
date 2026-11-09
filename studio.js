@@ -291,7 +291,7 @@ byId('make-link').addEventListener('click', async () => {
     const payload = await encodeCard({ name, category: source.category, price: source.price, brand: source.brand, description: input('description'), tags, color, design });
     if (attempt !== revision) return;
     if (payload.length > 100000) throw new Error('Карточка слишком большая для ссылки. Скачайте слайды в PNG.');
-    const url = new URL('product.html?v=sharp-slides', location.href);
+    const url = new URL('product.html?v=ozon-layout', location.href);
     url.hash = 'v2=' + payload;
     byId('share-url').value = byId('open-card').href = url.href;
     byId('share').hidden = false;
