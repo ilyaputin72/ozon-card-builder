@@ -7,19 +7,15 @@ const slideIds = ['cover', 'highlights', 'specifications'];
 const width = 900;
 const height = 1200;
 const themes = {
-  mint: { paper: '#dcefe5', light: '#f4faf5', dark: '#173f35', accent: '#367b62', ink: '#172d27', line: '#c1dbcb' },
-  blue: { paper: '#dce8ff', light: '#f4f8ff', dark: '#123777', accent: '#2862cb', ink: '#1b2b4b', line: '#c6d8f5' },
-  sand: { paper: '#f2e5d7', light: '#fff9f1', dark: '#583729', accent: '#946344', ink: '#342520', line: '#e4cdb8' }
+  mint: { paper: '#a9ca60', light: '#fff5da', dark: '#294420', accent: '#ff761d', ink: '#2d371e', line: '#dae889' },
+  blue: { paper: '#9cd7ee', light: '#fff6e4', dark: '#1c4766', accent: '#ff9862', ink: '#213d54', line: '#c8eff8' },
+  sand: { paper: '#ffda6b', light: '#fff5e8', dark: '#631b39', accent: '#ed5482', ink: '#532a32', line: '#ffeaa4' }
 };
 const example = {
-  kind: 'Бомбочки для ванны с игрушками', brand: 'Avanture', category: 'Красота и уход', price: '923',
-  facts: 'В наборе: 6 бомбочек\nМасса набора: 400 г\nЦвет: разноцветный\nАроматы: ваниль, клубника, банан, шоколад, мохито и лаванда',
-  benefits: 'Фигурки капибар\nШесть ароматов в одном наборе\nПодарочная коробка'
+  kind: 'Бомбочки для ванны «Капибары»', brand: '', category: 'Красота и уход', price: '890',
+  facts: 'В наборе: 6 бомбочек\nФигурки: капибары\nЦвет: ассорти\nУпаковка: подарочная крафт-коробка',
+  benefits: 'Шесть ярких бомбочек\nКапибара на каждой бомбочке\nПодарочная коробка'
 };
-const examplePhotos = [
-  'https://ir.ozone.ru/s3/multimedia-1-2/wc1000/7325426270.jpg',
-  'https://ir.ozone.ru/s3/multimedia-1-i/wc1000/7325426178.jpg'
-];
 const sourceForm = byId('source');
 let examplePhoto = false;
 let revision = 0;
@@ -65,30 +61,26 @@ function assembleText(source) {
   return { name, description, points: source.benefits.length ? source.benefits : source.facts.slice(0, 3).map(([key, value]) => (key + ': ' + value).slice(0, 80)) };
 }
 
-async function decodePhoto(url, remote = false) {
+async function decodePhoto(url) {
   const image = new Image();
-  if (remote) {
-    image.crossOrigin = 'anonymous';
-    image.referrerPolicy = 'no-referrer';
-  }
   image.src = url;
   await image.decode();
   return image;
 }
 
-async function loadPhotos() {
+async function loadPhoto() {
   const file = byId('photo').files[0];
   if (!file && !examplePhoto) throw new Error('Добавьте фото товара.');
   if (!file) {
-    try { return await Promise.all(examplePhotos.map((url) => decodePhoto(url, true))); }
-    catch { throw new Error('Ozon не отдал фотографии примера. Попробуйте позже или загрузите своё фото.'); }
+    try { return await decodePhoto('capybara-bath-bombs.webp'); }
+    catch { throw new Error('Не удалось открыть изображение примера. Попробуйте позже или загрузите своё фото.'); }
   }
   if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024)) {
     throw new Error('Выберите JPG, PNG или WebP размером до 10 МБ.');
   }
   const url = URL.createObjectURL(file);
   try {
-    return [await decodePhoto(url)];
+    return await decodePhoto(url);
   } catch {
     throw new Error('Не удалось открыть фото. Попробуйте другой файл.');
   } finally {
@@ -150,72 +142,90 @@ function contain(context, image, x, y, w, h) {
   context.drawImage(image, x + (w - drawWidth) / 2, y + (h - drawHeight) / 2, drawWidth, drawHeight);
 }
 
-function photoPanel(context, image, x, y, w, h, background) {
-  context.save();
-  shape(context, x, y, w, h, 32, background);
-  context.clip();
-  contain(context, image, x + 14, y + 14, w - 28, h - 28);
-  context.restore();
-}
-
-function background(canvas, colors, dark = false) {
+function background(canvas, fill) {
   const context = canvas.getContext('2d');
-  context.fillStyle = dark ? colors.dark : colors.light;
+  context.fillStyle = fill;
   context.fillRect(0, 0, width, height);
   return context;
 }
 
+function spark(context, x, y, size, fill) {
+  context.fillStyle = fill;
+  context.beginPath();
+  context.moveTo(x, y - size);
+  context.quadraticCurveTo(x + size * .14, y - size * .14, x + size, y);
+  context.quadraticCurveTo(x + size * .14, y + size * .14, x, y + size);
+  context.quadraticCurveTo(x - size * .14, y + size * .14, x - size, y);
+  context.quadraticCurveTo(x - size * .14, y - size * .14, x, y - size);
+  context.fill();
+}
+
+function backdrop(context, colors) {
+  context.fillStyle = colors.accent;
+  context.beginPath();
+  context.ellipse(455, 688, 432, 287, -.18, 0, 2 * Math.PI);
+  context.fill();
+  spark(context, 97, 433, 28, colors.light);
+  spark(context, 807, 387, 36, colors.accent);
+  spark(context, 798, 876, 40, colors.light);
+  spark(context, 87, 967, 23, colors.dark);
+}
+
 function renderSlides() {
   const colors = themes[input('theme')] || themes.mint;
-  const { source, photos: [image, detail = image] } = draft;
+  const { source, image } = draft;
   const name = input('title') || source.kind;
   const points = lines(input('points')).slice(0, 3);
-  const cover = background(byId('cover'), colors);
+  const cover = background(byId('cover'), colors.paper);
   if (input('format') === 'plain') {
     cover.fillStyle = '#fff';
     cover.fillRect(0, 0, width, height);
     contain(cover, image, 0, 0, width, height);
   } else {
-    const gradient = cover.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, colors.light);
-    gradient.addColorStop(1, colors.paper);
-    cover.fillStyle = gradient;
-    cover.fillRect(0, 0, width, height);
-    drawText(cover, (source.brand || source.category).toUpperCase(), 58, 57, 790, { size: 27, min: 20, color: colors.accent, weight: 800 });
-    drawText(cover, name, 58, 113, 790, { size: 78, min: 43, count: 3, color: colors.dark, weight: 820 });
-    cover.strokeStyle = colors.line;
-    cover.lineWidth = 2;
-    for (const radius of [285, 335, 385]) {
-      cover.beginPath();
-      cover.arc(458, 711, radius, 0, 2 * Math.PI);
-      cover.stroke();
-    }
-    contain(cover, image, 86, 375, 728, 680);
+    backdrop(cover, colors);
+    shape(cover, 54, 47, 360, 49, 25, colors.light);
+    drawText(cover, (source.brand || source.category).toUpperCase(), 72, 58, 326, { size: 26, min: 15, color: colors.dark, weight: 850 });
+    drawText(cover, name, 53, 118, 794, { size: 96, min: 49, count: 3, color: colors.dark, weight: 900 });
+    spark(cover, 790, 85, 31, colors.light);
+    contain(cover, image, 30, 390, 840, 648);
     const value = source.facts[0][1];
-    shape(cover, 58, 1065, 784, 79, 20, colors.dark);
-    drawText(cover, source.facts[0][0] + '  ·  ' + value, 88, 1085, 724, { size: 38, min: 23, color: colors.light });
+    shape(cover, 53, 1050, 794, 99, 32, colors.light);
+    drawText(cover, source.facts[0][0] + '  ·  ' + value, 80, 1073, 740, { size: 45, min: 23, color: colors.dark, weight: 850 });
   }
 
-  const highlight = background(byId('highlights'), colors, true);
-  drawText(highlight, '02  /  О ТОВАРЕ', 58, 57, 780, { size: 26, color: colors.paper, weight: 800 });
-  drawText(highlight, points.length ? 'Главные особенности' : source.kind, 58, 110, 780, { size: 64, min: 46, count: 2, color: '#fff' });
-  photoPanel(highlight, detail, 58, 275, 784, 405, colors.paper);
+  const highlight = background(byId('highlights'), colors.accent);
+  shape(highlight, 54, 48, 237, 46, 23, colors.light);
+  drawText(highlight, '02  /  О ТОВАРЕ', 74, 59, 193, { size: 24, color: colors.dark, weight: 850 });
+  drawText(highlight, points.length ? 'Главные особенности' : source.kind, 54, 111, 793, { size: 81, min: 48, count: 2, color: colors.dark, weight: 900 });
+  highlight.fillStyle = colors.paper;
+  highlight.beginPath();
+  highlight.ellipse(448, 488, 345, 193, -.13, 0, 2 * Math.PI);
+  highlight.fill();
+  spark(highlight, 95, 363, 30, colors.light);
+  spark(highlight, 812, 575, 34, colors.light);
+  contain(highlight, image, 130, 295, 640, 375);
   points.forEach((point, index) => {
     const y = 710 + index * 144;
-    shape(highlight, 58, y, 784, 123, 20, colors.light);
-    shape(highlight, 78, y + 24, 69, 69, 15, colors.paper);
+    shape(highlight, 58, y, 784, 123, 35, colors.light);
+    shape(highlight, 78, y + 24, 69, 69, 35, colors.paper);
     drawText(highlight, '0' + (index + 1), 93, y + 40, 52, { size: 28, color: colors.accent, weight: 800 });
     drawText(highlight, point, 169, y + 24, 641, { size: 40, min: 25, count: 2, color: colors.ink });
   });
 
-  const specs = background(byId('specifications'), colors);
-  shape(specs, 44, 45, 812, 213, 30, colors.paper);
-  drawText(specs, '03  /  ПАРАМЕТРЫ', 76, 70, 740, { size: 25, color: colors.accent, weight: 800 });
-  drawText(specs, 'Характеристики', 76, 120, 740, { size: 64, min: 46, color: colors.dark });
+  const specs = background(byId('specifications'), colors.paper);
+  shape(specs, 44, 45, 812, 213, 36, colors.accent);
+  shape(specs, 70, 65, 251, 48, 24, colors.light);
+  drawText(specs, '03  /  ПАРАМЕТРЫ', 88, 76, 219, { size: 24, color: colors.dark, weight: 850 });
+  drawText(specs, 'Характеристики', 70, 130, 760, { size: 79, min: 46, color: colors.dark, weight: 900 });
+  if (source.facts.length <= 5) {
+    spark(specs, 126, 1018, 34, colors.light);
+    spark(specs, 771, 921, 28, colors.accent);
+    contain(specs, image, 235, 823, 430, 340);
+  }
   source.facts.forEach(([key, value], index) => {
     const y = 280 + index * 107;
-    shape(specs, 45, y, 810, 95, 15, index % 2 === 0 ? '#fff' : colors.paper);
-    drawText(specs, key, 68, y + 16, 316, { size: 34, min: 20, count: 2, color: colors.accent, weight: 650 });
+    shape(specs, 45, y, 810, 95, 25, index % 2 === 0 ? colors.light : colors.line);
+    drawText(specs, key, 68, y + 16, 316, { size: 34, min: 20, count: 2, color: colors.dark, weight: 700 });
     drawText(specs, value, 407, y + 16, 425, { size: 38, min: 20, count: 2, color: colors.ink });
   });
   byId('share').hidden = true;
@@ -227,10 +237,10 @@ async function buildCard(textOverride, errorTarget) {
   status(errorTarget, 'Готовим карточку…');
   try {
     const source = readSource();
-    const photos = await loadPhotos();
+    const image = await loadPhoto();
     if (attempt !== revision) return;
     const text = textOverride || assembleText(source);
-    draft = { source, photos };
+    draft = { source, image };
     byId('title').value = text.name;
     byId('description').value = text.description;
     byId('points').value = text.points.join('\n');
@@ -339,7 +349,7 @@ byId('demo').addEventListener('click', () => {
   byId('photo').value = '';
   examplePhoto = true;
   byId('example-source').hidden = false;
-  byId('photo-note').textContent = 'Для примера используются две фотографии с Ozon.';
+  byId('photo-note').textContent = 'В примере используется сгенерированное изображение.';
   void buildCard(null, 'source-status');
 });
 byId('copy-prompt').addEventListener('click', async () => {
@@ -406,3 +416,5 @@ byId('copy-link').addEventListener('click', async () => {
   try { await copy(byId('share-url').value); status('result-status', 'Ссылка скопирована.'); }
   catch (error) { byId('share-url').select(); status('result-status', error.message, true); }
 });
+
+if (new URLSearchParams(location.search).get('demo') === 'capybara') byId('demo').click();

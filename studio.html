@@ -63,7 +63,7 @@
     @media(max-width:560px) { .wrap { width:calc(100% - 24px); } .panel { padding:13px; } .slides { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media(max-width:365px) { .fields,.slides { grid-template-columns:1fr; } }
   </style>
-  <script defer src="studio.js?v=bath-example"></script>
+  <script defer src="studio.js?v=capybara"></script>
 </head>
 <body>
   <header class="top"><div class="wrap"><span class="brand">Студия карточек</span><a href="./">Ручной редактор</a></div></header>
@@ -81,7 +81,7 @@
             <div class="field full"><label for="facts">Характеристики</label><textarea id="facts" rows="4" maxlength="500" required placeholder="Объём: 500 мл&#10;Материал: нержавеющая сталь&#10;Цвет: зелёный"></textarea><p class="hint">До 8 строк в формате «Характеристика: значение».</p></div>
             <div class="field full"><label for="benefits">Преимущества или сценарии использования</label><textarea id="benefits" rows="3" maxlength="300" placeholder="Можно открыть крышку одной рукой&#10;Помещается в подстаканник"></textarea><p class="hint">До 3 подтверждённых преимуществ, по одному на строку.</p></div>
             <div class="field full"><label for="photo">Фото товара</label><input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-note"><p id="photo-note" class="hint">JPG, PNG или WebP, до 10 МБ.</p></div>
-            <p class="hint full" id="example-source" hidden>Фото и характеристики из <a href="https://www.ozon.ru/product/podarochnyy-nabor-shipuchie-bombochki-dlya-vanny-s-igrushkoy-6-sht-ruchnoy-raboty-s-praline-1864110784/" target="_blank" rel="noopener noreferrer">карточки Avanture на Ozon</a>. Цена в примере демонстрационная.</p>
+            <p class="hint full" id="example-source" hidden>Сгенерированный товар. Характеристики и цена приведены для примера. <a href="https://www.ozon.ru/product/podarochnyy-nabor-shipuchie-bombochki-dlya-vanny-s-igrushkoy-6-sht-ruchnoy-raboty-s-praline-1864110784/" target="_blank" rel="noopener noreferrer">Референс оформления на Ozon</a>.</p>
           </div>
           <div class="actions"><button id="generate" class="button" type="submit">Собрать карточку</button></div>
           <p id="source-status" class="status" role="status"></p>
@@ -104,7 +104,7 @@
               <div class="field full"><label for="title">Название</label><input id="title" maxlength="100"></div>
               <div class="field full"><label for="description">Описание</label><textarea id="description" maxlength="1500" rows="4"></textarea></div>
               <div class="field full"><label for="points">Короткие подписи для слайда</label><textarea id="points" maxlength="240" rows="3"></textarea></div>
-              <div class="field"><label for="theme">Цвет слайдов</label><select id="theme"><option value="mint">Мята</option><option value="blue">Синий</option><option value="sand">Песочный</option></select></div>
+              <div class="field"><label for="theme">Палитра инфографики</label><select id="theme"><option value="mint">Лайм и апельсин</option><option value="blue">Голубой и персик</option><option value="sand">Жёлтый и малина</option></select></div>
               <div class="field"><label for="format">Формат главного слайда</label><select id="format"><option value="cover">Фото с заголовком</option><option value="plain">Только фото</option></select></div>
             </div>
           </details>
