@@ -211,7 +211,7 @@
         json += decoder.decode(value, { stream: true });
       }
       const card = JSON.parse(json + decoder.decode());
-      if (!card || typeof card.name !== 'string' || !card.name.trim() || !isPrice(card.price)) throw new Error('Invalid card');
+      if (!card || typeof card.name !== 'string' || !card.name.trim() || (card.price !== null && !isPrice(card.price))) throw new Error('Invalid card');
       return card;
     }
 
@@ -336,10 +336,11 @@
         sellerPhoto.src = images[0];
       }
       const bank = isPrice(card.bankPrice);
-      const old = isPrice(card.oldPrice) && card.oldPrice > card.price;
+      const price = isPrice(card.price);
+      const old = price && isPrice(card.oldPrice) && card.oldPrice > card.price;
       byId('bank-row').hidden = !bank;
       if (bank) byId('bank-price').textContent = formatPrice.format(card.bankPrice);
-      byId('price').textContent = formatPrice.format(card.price);
+      byId('price').textContent = price ? formatPrice.format(card.price) : 'Цена не указана';
       byId('price-row').classList.toggle('other-price', bank);
       byId('price-note').hidden = !bank;
       byId('old-price').hidden = !old;

@@ -68,23 +68,29 @@ async function decodePhoto(url) {
   return image;
 }
 
+function readPhotoFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => resolve(reader.result), { once: true });
+    reader.addEventListener('error', () => reject(reader.error), { once: true });
+    reader.readAsDataURL(file);
+  });
+}
+
 async function loadPhoto() {
   const file = byId('photo').files[0];
   if (!file && !examplePhoto) throw new Error('Добавьте фото товара.');
   if (!file) {
-    try { return await decodePhoto('capybara-bath-bombs.webp'); }
+    try { return await decodePhoto(studioDemoPhoto); }
     catch { throw new Error('Не удалось открыть изображение примера. Попробуйте позже или загрузите своё фото.'); }
   }
   if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024)) {
     throw new Error('Выберите JPG, PNG или WebP размером до 10 МБ.');
   }
-  const url = URL.createObjectURL(file);
   try {
-    return await decodePhoto(url);
+    return await decodePhoto(await readPhotoFile(file));
   } catch {
     throw new Error('Не удалось открыть фото. Попробуйте другой файл.');
-  } finally {
-    URL.revokeObjectURL(url);
   }
 }
 
@@ -143,6 +149,8 @@ function contain(context, image, x, y, w, h) {
 }
 
 function background(canvas, fill) {
+  // Reset the drawing surface as well as its export permissions.
+  canvas.width = width;
   const context = canvas.getContext('2d');
   context.fillStyle = fill;
   context.fillRect(0, 0, width, height);
@@ -342,6 +350,16 @@ sourceForm.addEventListener('input', (event) => {
   invalidate();
 });
 sourceForm.addEventListener('submit', (event) => { event.preventDefault(); void buildCard(null, 'source-status'); });
+byId('new-card').addEventListener('click', () => {
+  sourceForm.reset();
+  examplePhoto = false;
+  byId('example-source').hidden = true;
+  byId('photo-note').textContent = 'JPG, PNG или WebP, до 10 МБ.';
+  byId('ai-response').value = '';
+  status('ai-status', '');
+  invalidate();
+  byId('kind').focus();
+});
 byId('demo').addEventListener('click', () => {
   if (byId('generate').disabled) return;
   invalidate();
@@ -371,15 +389,19 @@ for (const id of ['title', 'description', 'points', 'theme', 'format']) {
 document.querySelectorAll('[data-download]').forEach((button, index) => {
   button.addEventListener('click', () => {
     if (!draft) return;
-    byId(button.dataset.download).toBlob((blob) => {
-      if (!blob) { status('result-status', 'Браузер не смог сохранить PNG.', true); return; }
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = 'ozon-' + (index + 1) + '-' + button.dataset.download + '.png';
-      anchor.click();
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    }, 'image/png');
+    try {
+      byId(button.dataset.download).toBlob((blob) => {
+        if (!blob) { status('result-status', 'Браузер не смог сохранить PNG.', true); return; }
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'ozon-' + (index + 1) + '-' + button.dataset.download + '.png';
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }, 'image/png');
+    } catch {
+      status('result-status', 'Браузер заблокировал экспорт. Обновите страницу и соберите карточку заново.', true);
+    }
   });
 });
 byId('copy-text').addEventListener('click', async () => {
@@ -393,7 +415,7 @@ byId('make-link').addEventListener('click', async () => {
   const attempt = ++revision;
   const { source } = draft;
   const name = input('title');
-  if (!name || source.price === null) { status('result-status', 'Для ссылки заполните название и цену.', true); return; }
+  if (!name) { status('result-status', 'Введите название карточки.', true); byId('title').closest('details').open = true; byId('title').focus(); return; }
   status('result-status', 'Готовим ссылку…');
   byId('share').hidden = true;
   try {
@@ -403,13 +425,18 @@ byId('make-link').addEventListener('click', async () => {
     const payload = await encodeCard({ name, category: source.category, price: source.price, brand: source.brand, description: input('description'), tags, color, images });
     if (attempt !== revision) return;
     if (payload.length > 100000) throw new Error('Карточка слишком большая для ссылки. Скачайте слайды в PNG.');
-    const url = new URL('product.html', location.href);
+    const url = new URL('product.html?v=export-fix', location.href);
     url.hash = 'v1=' + payload;
     byId('share-url').value = byId('open-card').href = url.href;
     byId('share').hidden = false;
     status('result-status', 'Ссылка на макет готова.');
+    byId('open-card').focus();
   } catch (error) {
-    if (attempt === revision) status('result-status', error.message, true);
+    if (attempt === revision) {
+      status('result-status', error.name === 'SecurityError'
+        ? 'Браузер заблокировал экспорт. Обновите страницу и соберите карточку заново.'
+        : error.message, true);
+    }
   }
 });
 byId('copy-link').addEventListener('click', async () => {
@@ -417,4 +444,4 @@ byId('copy-link').addEventListener('click', async () => {
   catch (error) { byId('share-url').select(); status('result-status', error.message, true); }
 });
 
-if (new URLSearchParams(location.search).get('demo') === 'capybara') byId('demo').click();
+if (!input('kind') && !input('facts') && !byId('photo').files.length) byId('demo').click();

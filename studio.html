@@ -63,7 +63,8 @@
     @media(max-width:560px) { .wrap { width:calc(100% - 24px); } .panel { padding:13px; } .slides { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media(max-width:365px) { .fields,.slides { grid-template-columns:1fr; } }
   </style>
-  <script defer src="studio.js?v=capybara"></script>
+  <script defer src="studio-demo-photo.js"></script>
+  <script defer src="studio.js?v=export-fix"></script>
 </head>
 <body>
   <header class="top"><div class="wrap"><span class="brand">Студия карточек</span><a href="./">Ручной редактор</a></div></header>
@@ -71,7 +72,7 @@
     <div class="hero"><p class="kicker">Карточка товара</p><h1>Из фото и фактов в готовую карточку</h1><p class="intro">Соберите название, описание, три слайда инфографики и ссылку на макет.</p></div>
     <div class="workspace">
       <section class="panel" aria-labelledby="source-title">
-        <div class="panel-head"><h2 id="source-title">1. Данные товара</h2><button id="demo" class="button secondary small" type="button">Пример с бомбочками для ванны</button></div>
+        <div class="panel-head"><h2 id="source-title">1. Данные товара</h2><button id="new-card" class="button secondary small" type="button">Новый товар</button><button id="demo" class="button secondary small" type="button">Пример с бомбочками для ванны</button></div>
         <form id="source">
           <div class="fields">
             <div class="field"><label for="kind">Что продаём</label><input id="kind" maxlength="64" required placeholder="Термокружка"></div>
@@ -114,8 +115,8 @@
             <figure class="slide"><canvas id="specifications" width="900" height="1200" aria-label="Слайд с характеристиками"></canvas><figcaption>03 · Характеристики</figcaption><button class="button secondary small" data-download="specifications" type="button">Скачать PNG 3</button></figure>
           </div>
           <div class="actions"><button id="copy-text" class="button secondary" type="button">Скопировать название и описание</button><button id="make-link" class="button" type="button">Создать ссылку на макет</button></div>
-          <div id="share" class="share" hidden><label for="share-url">Ссылка на карточку</label><input id="share-url" readonly><div class="actions"><a id="open-card" class="button" target="_blank" rel="noopener">Открыть макет ↗</a><button id="copy-link" class="button secondary" type="button">Скопировать ссылку</button></div><p class="hint">Ссылка длинная, потому что в неё встроены три уменьшенных слайда. Для полного размера скачайте PNG.</p></div>
           <p id="result-status" class="status" role="status"></p>
+          <div id="share" class="share" hidden><label for="share-url">Ссылка на карточку</label><input id="share-url" readonly><div class="actions"><a id="open-card" class="button" target="_blank" rel="noopener">Открыть макет ↗</a><button id="copy-link" class="button secondary" type="button">Скопировать ссылку</button></div><p class="hint">Ссылка длинная, потому что в неё встроены три уменьшенных слайда. Для полного размера скачайте PNG.</p></div>
         </div>
       </section>
     </div>
