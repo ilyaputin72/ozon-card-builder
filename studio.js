@@ -4,13 +4,6 @@ const byId = (id) => document.getElementById(id);
 const input = (id) => byId(id).value.trim();
 const lines = (text) => text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 const slideIds = ['cover', 'highlights', 'specifications'];
-const width = 900;
-const height = 1200;
-const themes = {
-  mint: { paper: '#a9ca60', light: '#fff5da', dark: '#294420', accent: '#ff761d', ink: '#2d371e', line: '#dae889' },
-  blue: { paper: '#9cd7ee', light: '#fff6e4', dark: '#1c4766', accent: '#ff9862', ink: '#213d54', line: '#c8eff8' },
-  sand: { paper: '#ffda6b', light: '#fff5e8', dark: '#631b39', accent: '#ed5482', ink: '#532a32', line: '#ffeaa4' }
-};
 const example = {
   kind: 'Бомбочки для ванны «Капибары»', brand: '', category: 'Красота и уход', price: '890',
   facts: 'В наборе: 6 бомбочек\nФигурки: капибары\nЦвет: ассорти\nУпаковка: подарочная крафт-коробка',
@@ -94,147 +87,19 @@ async function loadPhoto() {
   }
 }
 
-function font(context, size, weight = 700) {
-  context.font = weight + ' ' + size + 'px system-ui, sans-serif';
-}
-
-function wrapText(context, text, maxWidth) {
-  const output = [];
-  let line = '';
-  for (const word of text.trim().split(/\s+/)) {
-    const candidate = line ? line + ' ' + word : word;
-    if (context.measureText(candidate).width <= maxWidth) { line = candidate; continue; }
-    if (line) output.push(line);
-    line = '';
-    for (const character of word) {
-      if (line && context.measureText(line + character).width > maxWidth) { output.push(line); line = ''; }
-      line += character;
-    }
-  }
-  if (line) output.push(line);
-  return output;
-}
-
-function drawText(context, text, x, y, maxWidth, { size, min = size, count = 1, color, weight = 700 }) {
-  let rows;
-  let fitted = size;
-  for (; fitted >= min; fitted -= 1) {
-    font(context, fitted, weight);
-    rows = wrapText(context, text, maxWidth);
-    if (rows.length <= count || fitted === min) break;
-  }
-  if (rows.length > count) {
-    rows = rows.slice(0, count);
-    let tail = rows.at(-1);
-    while (tail && context.measureText(tail + '…').width > maxWidth) tail = tail.slice(0, -1);
-    rows[count - 1] = tail.trimEnd() + '…';
-  }
-  context.fillStyle = color;
-  context.textBaseline = 'top';
-  rows.forEach((row, index) => context.fillText(row, x, y + index * Math.round(fitted * 1.15)));
-}
-
-function shape(context, x, y, w, h, radius, fill) {
-  context.fillStyle = fill;
-  context.beginPath();
-  context.roundRect(x, y, w, h, radius);
-  context.fill();
-}
-
-function contain(context, image, x, y, w, h) {
-  const scale = Math.min(w / image.naturalWidth, h / image.naturalHeight);
-  const drawWidth = image.naturalWidth * scale;
-  const drawHeight = image.naturalHeight * scale;
-  context.drawImage(image, x + (w - drawWidth) / 2, y + (h - drawHeight) / 2, drawWidth, drawHeight);
-}
-
-function background(canvas, fill) {
-  // Reset the drawing surface as well as its export permissions.
-  canvas.width = width;
-  const context = canvas.getContext('2d');
-  context.fillStyle = fill;
-  context.fillRect(0, 0, width, height);
-  return context;
-}
-
-function spark(context, x, y, size, fill) {
-  context.fillStyle = fill;
-  context.beginPath();
-  context.moveTo(x, y - size);
-  context.quadraticCurveTo(x + size * .14, y - size * .14, x + size, y);
-  context.quadraticCurveTo(x + size * .14, y + size * .14, x, y + size);
-  context.quadraticCurveTo(x - size * .14, y + size * .14, x - size, y);
-  context.quadraticCurveTo(x - size * .14, y - size * .14, x, y - size);
-  context.fill();
-}
-
-function backdrop(context, colors) {
-  context.fillStyle = colors.accent;
-  context.beginPath();
-  context.ellipse(455, 688, 432, 287, -.18, 0, 2 * Math.PI);
-  context.fill();
-  spark(context, 97, 433, 28, colors.light);
-  spark(context, 807, 387, 36, colors.accent);
-  spark(context, 798, 876, 40, colors.light);
-  spark(context, 87, 967, 23, colors.dark);
+function slideOptions() {
+  return {
+    kind: draft.source.kind,
+    points: lines(input('points')).slice(0, 3),
+    theme: input('theme'),
+    format: input('format')
+  };
 }
 
 function renderSlides() {
-  const colors = themes[input('theme')] || themes.mint;
-  const { source, image } = draft;
-  const name = input('title') || source.kind;
-  const points = lines(input('points')).slice(0, 3);
-  const cover = background(byId('cover'), colors.paper);
-  if (input('format') === 'plain') {
-    cover.fillStyle = '#fff';
-    cover.fillRect(0, 0, width, height);
-    contain(cover, image, 0, 0, width, height);
-  } else {
-    backdrop(cover, colors);
-    shape(cover, 54, 47, 360, 49, 25, colors.light);
-    drawText(cover, (source.brand || source.category).toUpperCase(), 72, 58, 326, { size: 26, min: 15, color: colors.dark, weight: 850 });
-    drawText(cover, name, 53, 118, 794, { size: 96, min: 49, count: 3, color: colors.dark, weight: 900 });
-    spark(cover, 790, 85, 31, colors.light);
-    contain(cover, image, 30, 390, 840, 648);
-    const value = source.facts[0][1];
-    shape(cover, 53, 1050, 794, 99, 32, colors.light);
-    drawText(cover, source.facts[0][0] + '  ·  ' + value, 80, 1073, 740, { size: 45, min: 23, color: colors.dark, weight: 850 });
-  }
-
-  const highlight = background(byId('highlights'), colors.accent);
-  shape(highlight, 54, 48, 237, 46, 23, colors.light);
-  drawText(highlight, '02  /  О ТОВАРЕ', 74, 59, 193, { size: 24, color: colors.dark, weight: 850 });
-  drawText(highlight, points.length ? 'Главные особенности' : source.kind, 54, 111, 793, { size: 81, min: 48, count: 2, color: colors.dark, weight: 900 });
-  highlight.fillStyle = colors.paper;
-  highlight.beginPath();
-  highlight.ellipse(448, 488, 345, 193, -.13, 0, 2 * Math.PI);
-  highlight.fill();
-  spark(highlight, 95, 363, 30, colors.light);
-  spark(highlight, 812, 575, 34, colors.light);
-  contain(highlight, image, 130, 295, 640, 375);
-  points.forEach((point, index) => {
-    const y = 710 + index * 144;
-    shape(highlight, 58, y, 784, 123, 35, colors.light);
-    shape(highlight, 78, y + 24, 69, 69, 35, colors.paper);
-    drawText(highlight, '0' + (index + 1), 93, y + 40, 52, { size: 28, color: colors.accent, weight: 800 });
-    drawText(highlight, point, 169, y + 24, 641, { size: 40, min: 25, count: 2, color: colors.ink });
-  });
-
-  const specs = background(byId('specifications'), colors.paper);
-  shape(specs, 44, 45, 812, 213, 36, colors.accent);
-  shape(specs, 70, 65, 251, 48, 24, colors.light);
-  drawText(specs, '03  /  ПАРАМЕТРЫ', 88, 76, 219, { size: 24, color: colors.dark, weight: 850 });
-  drawText(specs, 'Характеристики', 70, 130, 760, { size: 79, min: 46, color: colors.dark, weight: 900 });
-  if (source.facts.length <= 5) {
-    spark(specs, 126, 1018, 34, colors.light);
-    spark(specs, 771, 921, 28, colors.accent);
-    contain(specs, image, 235, 823, 430, 340);
-  }
-  source.facts.forEach(([key, value], index) => {
-    const y = 280 + index * 107;
-    shape(specs, 45, y, 810, 95, 25, index % 2 === 0 ? colors.light : colors.line);
-    drawText(specs, key, 68, y + 16, 316, { size: 34, min: 20, count: 2, color: colors.dark, weight: 700 });
-    drawText(specs, value, 407, y + 16, 425, { size: 38, min: 20, count: 2, color: colors.ink });
+  const canvases = Object.fromEntries(slideIds.map((id) => [id, byId(id)]));
+  studioSlides.render(canvases, {
+    ...slideOptions(), source: draft.source, image: draft.image, name: input('title') || draft.source.kind
   });
   byId('share').hidden = true;
 }
@@ -248,7 +113,7 @@ async function buildCard(textOverride, errorTarget) {
     const image = await loadPhoto();
     if (attempt !== revision) return;
     const text = textOverride || assembleText(source);
-    draft = { source, image };
+    draft = { source, image, usesDemoPhoto: examplePhoto };
     byId('title').value = text.name;
     byId('description').value = text.description;
     byId('points').value = text.points.join('\n');
@@ -321,17 +186,18 @@ function aiText(value) {
   return { name: parsed.name.trim(), description: parsed.description.trim(), points: parsed.points.map((point) => point.trim()) };
 }
 
-function shrinkSlide(canvas) {
-  const preview = document.createElement('canvas');
-  const context = preview.getContext('2d');
-  for (const size of [540, 450, 360, 270, 210, 150]) {
-    preview.width = size;
-    preview.height = size * 4 / 3;
-    context.drawImage(canvas, 0, 0, preview.width, preview.height);
-    const image = preview.toDataURL('image/webp', .68);
-    if (image.length <= 21000) return image;
+function sharePhoto(image) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  for (const [maxSide, quality] of [[1200, .9], [1000, .86], [840, .82], [680, .8], [540, .76], [400, .7], [260, .66]]) {
+    const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const photo = canvas.toDataURL('image/webp', quality);
+    if (photo.length <= 77000) return photo;
   }
-  throw new Error('Слайды не поместились в ссылку. PNG можно сохранить отдельно.');
+  throw new Error('Фото не поместилось в ссылку. Загрузите изображение меньшего размера.');
 }
 
 async function encodeCard(card) {
@@ -419,14 +285,14 @@ byId('make-link').addEventListener('click', async () => {
   status('result-status', 'Готовим ссылку…');
   byId('share').hidden = true;
   try {
-    const images = slideIds.map((id) => shrinkSlide(byId(id)));
+    const design = { ...slideOptions(), photo: draft.usesDemoPhoto ? 'capybara' : sharePhoto(draft.image) };
     const tags = source.facts.map(([key, value]) => key + ': ' + value);
     const color = source.facts.find(([key]) => /^цвет$/i.test(key))?.[1];
-    const payload = await encodeCard({ name, category: source.category, price: source.price, brand: source.brand, description: input('description'), tags, color, images });
+    const payload = await encodeCard({ name, category: source.category, price: source.price, brand: source.brand, description: input('description'), tags, color, design });
     if (attempt !== revision) return;
     if (payload.length > 100000) throw new Error('Карточка слишком большая для ссылки. Скачайте слайды в PNG.');
-    const url = new URL('product.html?v=export-fix', location.href);
-    url.hash = 'v1=' + payload;
+    const url = new URL('product.html?v=sharp-slides', location.href);
+    url.hash = 'v2=' + payload;
     byId('share-url').value = byId('open-card').href = url.href;
     byId('share').hidden = false;
     status('result-status', 'Ссылка на макет готова.');

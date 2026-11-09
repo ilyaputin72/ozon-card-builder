@@ -64,7 +64,8 @@
     @media(max-width:365px) { .fields,.slides { grid-template-columns:1fr; } }
   </style>
   <script defer src="studio-demo-photo.js"></script>
-  <script defer src="studio.js?v=export-fix"></script>
+  <script defer src="studio-slides.js?v=1"></script>
+  <script defer src="studio.js?v=sharp-slides"></script>
 </head>
 <body>
   <header class="top"><div class="wrap"><span class="brand">Студия карточек</span><a href="./">Ручной редактор</a></div></header>
@@ -116,7 +117,7 @@
           </div>
           <div class="actions"><button id="copy-text" class="button secondary" type="button">Скопировать название и описание</button><button id="make-link" class="button" type="button">Создать ссылку на макет</button></div>
           <p id="result-status" class="status" role="status"></p>
-          <div id="share" class="share" hidden><label for="share-url">Ссылка на карточку</label><input id="share-url" readonly><div class="actions"><a id="open-card" class="button" target="_blank" rel="noopener">Открыть макет ↗</a><button id="copy-link" class="button secondary" type="button">Скопировать ссылку</button></div><p class="hint">Ссылка длинная, потому что в неё встроены три уменьшенных слайда. Для полного размера скачайте PNG.</p></div>
+          <div id="share" class="share" hidden><label for="share-url">Ссылка на карточку</label><input id="share-url" readonly><div class="actions"><a id="open-card" class="button" target="_blank" rel="noopener">Открыть макет ↗</a><button id="copy-link" class="button secondary" type="button">Скопировать ссылку</button></div><p class="hint">Слайды в макете отрисовываются в размере 900 × 1200. Для своих товаров ссылка может быть длинной, так как содержит фото.</p></div>
         </div>
       </section>
     </div>

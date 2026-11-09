@@ -189,13 +189,15 @@
   </main>
   <dialog id="photo-dialog" aria-label="Фото товара"><form method="dialog"><button type="submit">Закрыть</button></form><img id="zoomed-photo" alt=""></dialog>
   <footer><div class="wrap">Учебный макет карточки Ozon · <a href="./">Конструктор карточек</a></div></footer>
+  <script src="studio-demo-photo.js"></script>
+  <script src="studio-slides.js?v=1"></script>
   <script>
     const byId = (id) => document.getElementById(id);
     const formatPrice = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', trailingZeroDisplay: 'stripIfInteger' });
     const say = (message) => { byId('notice').textContent = message; };
 
     async function readCard() {
-      const match = /^#v1=([a-zA-Z0-9_-]{1,100000})$/.exec(location.hash);
+      const match = /^#v[12]=([a-zA-Z0-9_-]{1,100000})$/.exec(location.hash);
       if (!match) throw new Error('Missing card');
       const encoded = match[1].replaceAll('-', '+').replaceAll('_', '/');
       const bytes = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
@@ -231,6 +233,31 @@
         if (url.protocol === 'https:' && !url.username && !url.password) return url.href;
       } catch { return ''; }
       return '';
+    }
+
+    async function renderStudioImages(card, name, brand, category, facts) {
+      const design = card.design;
+      if (!design || !facts.length) return [];
+      const photo = design.photo === 'capybara' ? studioDemoPhoto : design.photo;
+      if (typeof photo !== 'string' || photo.length > 170000 ||
+          !/^data:image\/(?:webp|png);base64,[a-zA-Z0-9+/=]+$/.test(photo)) return [];
+      try {
+        const image = new Image();
+        image.src = photo;
+        await image.decode();
+        const points = Array.isArray(design.points) ? design.points.slice(0, 3).map((point) => text(point, 240)).filter(Boolean) : [];
+        const canvases = Object.fromEntries(['cover', 'highlights', 'specifications'].map((id) => [id, document.createElement('canvas')]));
+        studioSlides.render(canvases, {
+          source: { kind: text(design.kind, 64) || name, brand, category, facts: facts.slice(0, 8) },
+          image, name, points, theme: design.theme, format: design.format
+        });
+        const blobs = await Promise.all(Object.values(canvases).map((canvas) =>
+          new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+        ));
+        return blobs.every(Boolean) ? blobs.map((blob) => URL.createObjectURL(blob)) : [photo];
+      } catch {
+        return [photo];
+      }
     }
 
     function addSpecs(list, specs) {
@@ -294,7 +321,7 @@
       }
     }
 
-    function render(card) {
+    async function render(card) {
       const name = text(card.name, 100);
       const brand = text(card.brand, 60);
       const sku = text(card.sku, 40);
@@ -316,18 +343,20 @@
       byId('seller').textContent = seller;
       byId('seller-box').hidden = !seller;
       byId('description-text').textContent = text(card.description, 1500) || 'Описание пока не добавлено.';
-      const specs = brand ? [['Бренд', brand]] : [];
+      const facts = [];
       const tags = Array.isArray(card.tags) ? card.tags.slice(0, 250) : [];
       for (const tag of tags) {
         const line = text(tag, 500);
         if (!line) continue;
         const separator = line.indexOf(':');
-        specs.push(separator > 0 ? [line.slice(0, separator).trim(), line.slice(separator + 1).trim()] : ['Особенность', line]);
+        facts.push(separator > 0 ? [line.slice(0, separator).trim(), line.slice(separator + 1).trim()] : ['Особенность', line]);
       }
+      const specs = brand ? [['Бренд', brand], ...facts] : facts;
       addSpecs(byId('short-specs'), specs.slice(0, 5));
       addSpecs(byId('full-specs'), specs);
       byId('no-specs').hidden = byId('no-full-specs').hidden = Boolean(specs.length);
       const images = Array.isArray(card.images) ? card.images.slice(0, 6).map(imageSource).filter(Boolean) : [];
+      if (!images.length && card.design) images.push(...await renderStudioImages(card, name, brand, category, facts));
       if (!images.length && card.demo === true) images.push('sample-photo.svg');
       gallery(images, name, Boolean(color));
       if (seller && images.length) {
